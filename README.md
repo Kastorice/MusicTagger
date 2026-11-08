@@ -6,6 +6,9 @@
 
 > 所有音频与图片只在本机处理，不上传任何文件。在线功能仅查询公开的歌词 / 封面信息。
 
+- GitHub 仓库：<https://github.com/Kastorice/MusicTagger>
+- 开源许可：[Apache License 2.0](LICENSE)
+
 ## 界面预览
 
 | 曲库 | 编辑标签 | 歌词与文件信息 |
@@ -145,3 +148,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\e2e\prepare-media.ps1
 - 应用不包含任何音频素材；测试素材由 ffmpeg 合成的正弦波生成。
 - UI 库 [MiuiX](https://github.com/compose-miuix-ui/miuix) 以 Apache-2.0 许可发布。
 - 在线歌词/封面版权归原平台与版权方所有，仅用于个人学习与本地标签整理。
+
+## 开源许可
+
+本项目以 [Apache License 2.0](LICENSE) 开源发布。你可以自由使用、修改与分发，
+但需保留版权与许可声明；项目按「现状」提供，不附带任何明示或暗示的担保。
+
+欢迎通过 GitHub Issues / Pull Requests 反馈问题或贡献代码：
+<https://github.com/Kastorice/MusicTagger>
