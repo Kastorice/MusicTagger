@@ -4,9 +4,20 @@
 
 ## 下载
 
-- `MusicTagger-v1.0.0-debug.apk`（debug 签名，约 19.4 MB）
-- 校验：`SHA256.txt` 与 APK 一同发布
+- `MusicTagger-v1.0.0.apk`（debug 签名，约 19.4 MB）
+- 校验：`SHA256.txt` 与 APK 一同发布（SHA-256：`B0D3D88DB1C24984036B0108699115273E5FF6A67378F8F41AD4B6B32A23353C`）
 - 系统要求：Android 8.0（API 26）及以上；动态取色需 Android 12+
+- 安装：下载 APK 后允许「安装未知来源应用」，或 `adb install MusicTagger-v1.0.0.apk`
+
+## 截图
+
+| 曲库 | 编辑标签 | 在线匹配 |
+|---|---|---|
+| ![曲库](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/01-library.png) | ![编辑](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/02-editor.png) | ![匹配](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/05-online-match.png) |
+
+| 文件信息 | 设置 | 关于 |
+|---|---|---|
+| ![文件信息](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/12-file-info.png) | ![设置](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/06-settings.png) | ![关于](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/13-about.png) |
 
 ## 功能
 
