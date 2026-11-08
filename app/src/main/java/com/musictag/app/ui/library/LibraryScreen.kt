@@ -106,7 +106,7 @@ fun LibraryScreen(
                         label = "搜索标题、歌手或专辑",
                         useLabelAsPlaceholder = true,
                         singleLine = true,
-                        cornerRadius = 14.dp,
+                        cornerRadius = 24.dp,
                         leadingIcon = {
                             Box(modifier = Modifier.padding(end = 10.dp)) {
                                 Icon(

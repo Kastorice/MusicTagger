@@ -22,12 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,11 +44,9 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 
@@ -396,8 +396,9 @@ fun MusicTagTextField(
 }
 
 /**
- * Native MiuiX dropdown list popup. Must be composed inside the trigger layout
- * (and inside a Scaffold) so MiuiX can anchor and host it.
+ * MIUI style dropdown menu anchored to its trigger. It is hosted in a window
+ * popup so the card keeps a proper inset from the screen edge (matching the
+ * HyperOS/KernelSU context menu), instead of being clamped to the window edge.
  */
 @Composable
 fun MiuixOverflowMenu(
@@ -405,20 +406,46 @@ fun MiuixOverflowMenu(
     onDismissRequest: () -> Unit,
     items: List<Pair<String, () -> Unit>>,
 ) {
-    OverlayListPopup(
-        show = expanded,
+    if (!expanded) return
+    val marginPx = with(LocalDensity.current) { 12.dp.roundToPx() }
+    val positionProvider = remember(marginPx) {
+        object : androidx.compose.ui.window.PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: androidx.compose.ui.unit.IntRect,
+                windowSize: androidx.compose.ui.unit.IntSize,
+                layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+                popupContentSize: androidx.compose.ui.unit.IntSize,
+            ): androidx.compose.ui.unit.IntOffset {
+                val maxX = (windowSize.width - popupContentSize.width - marginPx).coerceAtLeast(marginPx)
+                val x = (anchorBounds.right - popupContentSize.width).coerceIn(marginPx, maxX)
+                val maxY = (windowSize.height - popupContentSize.height - marginPx).coerceAtLeast(marginPx)
+                val y = (anchorBounds.bottom + marginPx).coerceIn(marginPx, maxY)
+                return androidx.compose.ui.unit.IntOffset(x, y)
+            }
+        }
+    }
+    androidx.compose.ui.window.Popup(
+        popupPositionProvider = positionProvider,
         onDismissRequest = onDismissRequest,
-        maxHeight = 320.dp,
+        properties = androidx.compose.ui.window.PopupProperties(focusable = true),
     ) {
-        ListPopupColumn {
-            items.forEach { (label, action) ->
-                BasicComponent(
-                    title = label,
-                    onClick = {
-                        onDismissRequest()
-                        action()
-                    },
-                )
+        Surface(
+            modifier = Modifier.width(200.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MiuixTheme.colorScheme.surface,
+            shadowElevation = 8.dp,
+        ) {
+            Column {
+                items.forEach { (label, action) ->
+                    BasicComponent(
+                        title = label,
+                        onClick = {
+                            onDismissRequest()
+                            action()
+                        },
+                        insideMargin = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                    )
+                }
             }
         }
     }

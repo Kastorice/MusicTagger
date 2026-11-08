@@ -4,10 +4,15 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M62.5,30.5 L62.5,67.2 C62.5,71.8 58.9,75.5 54.3,75.5 C50,75.5 46.4,72.4 46.4,68.4 C46.4,64.3 50,61.1 54.4,61.1 C55.5,61.1 56.6,61.3 57.5,61.7 L57.5,38.5 L78.5,32.5 L78.5,59.2 C78.5,63.8 74.9,67.5 70.3,67.5 C66,67.5 62.4,64.4 62.4,60.4 C62.4,56.3 66,53.1 70.4,53.1 C71.6,53.1 72.7,53.3 73.6,53.7 L73.6,35.2 Z" />
-    <path
-        android:fillColor="#E8DEFF"
-        android:pathData="M30,79 C42,84 66,84 78,79 L78,83 C66,88 42,88 30,83 Z" />
+    <!-- queue_music glyph, scaled to the golden-ratio content area (61.8% of 108dp)
+         and centered inside the adaptive-icon safe zone. -->
+    <group
+        android:scaleX="3.7"
+        android:scaleY="3.7"
+        android:translateX="9.55"
+        android:translateY="5.9">
+        <path
+            android:fillColor="#1F1F1F"
+            android:pathData="M16,20q-1.25,0-2.13-0.88T13,17t0.88-2.13T16,14q0.28,0 0.53,0.04T17,14.2V6h5V8H19v9q0,1.25-0.88,2.13T16,20ZM3,16V14h8v2H3Zm0-4V10H15v2H3ZM3,8V6H15V8H3Z" />
+    </group>
 </vector>
