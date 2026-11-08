@@ -34,17 +34,16 @@ import com.musictag.app.ui.components.ArtworkCard
 import com.musictag.app.ui.components.EmptyState
 import com.musictag.app.ui.components.FormatBadge
 import com.musictag.app.ui.components.MiuixOverflowMenu
+import com.musictag.app.ui.components.MiuixSearchField
 import com.musictag.app.util.Formats
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Search
 
 @Composable
 fun LibraryScreen(
@@ -99,24 +98,10 @@ fun LibraryScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item(key = "search") {
-                    TextField(
+                    MiuixSearchField(
                         value = query,
                         onValueChange = { query = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = "搜索标题、歌手或专辑",
-                        useLabelAsPlaceholder = true,
-                        singleLine = true,
-                        cornerRadius = 24.dp,
-                        leadingIcon = {
-                            Box(modifier = Modifier.padding(end = 10.dp)) {
-                                Icon(
-                                    imageVector = MiuixIcons.Search,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        },
-                        textStyle = MiuixTheme.textStyles.body2,
+                        placeholder = "搜索标题、歌手或专辑",
                     )
                 }
                 if (filtered.isEmpty()) {

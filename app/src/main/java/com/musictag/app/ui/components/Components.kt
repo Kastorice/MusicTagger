@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -47,6 +49,8 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 
@@ -393,6 +397,63 @@ fun MusicTagTextField(
         backgroundColor = MiuixTheme.colorScheme.secondaryContainer,
         textStyle = MiuixTheme.textStyles.body1,
     )
+}
+
+/**
+ * Capsule search field with explicit spacing: icon has a 20 dp inset from the
+ * capsule edge and a 14 dp gap before the placeholder / input text. The MiuiX
+ * TextField leadingIcon slot hugs the left edge, so the row is composed
+ * manually here instead.
+ */
+@Composable
+fun MiuixSearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .clip(miuixCapsuleShape())
+            .background(MiuixTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = MiuixIcons.Search,
+            contentDescription = null,
+            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.width(14.dp))
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+            if (value.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                )
+            }
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = MiuixTheme.textStyles.body2.copy(
+                    color = MiuixTheme.colorScheme.onSurface,
+                ),
+                cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth().height(46.dp),
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.CenterStart,
+                    ) { innerTextField() }
+                },
+            )
+        }
+    }
 }
 
 /**
