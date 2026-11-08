@@ -34,7 +34,6 @@ import com.musictag.app.ui.components.ArtworkCard
 import com.musictag.app.ui.components.EmptyState
 import com.musictag.app.ui.components.FormatBadge
 import com.musictag.app.ui.components.MiuixOverflowMenu
-import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.util.Formats
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -99,24 +98,6 @@ fun LibraryScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                item(key = "summary") {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "本地音乐",
-                            style = MiuixTheme.textStyles.subtitle,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant,
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            text = "共 ${state.items.size} 首",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant,
-                        )
-                    }
-                }
                 item(key = "search") {
                     TextField(
                         value = query,
@@ -127,7 +108,13 @@ fun LibraryScreen(
                         singleLine = true,
                         cornerRadius = 14.dp,
                         leadingIcon = {
-                            Icon(MiuixIcons.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Box(modifier = Modifier.padding(end = 10.dp)) {
+                                Icon(
+                                    imageVector = MiuixIcons.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
                         },
                         textStyle = MiuixTheme.textStyles.body2,
                     )

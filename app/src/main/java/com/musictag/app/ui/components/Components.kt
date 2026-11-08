@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.components
+package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -9,16 +9,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,8 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import com.musictag.app.R
 import com.musictag.app.data.NetworkImageLoader
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -45,10 +42,13 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
 
 /** Rounded artwork thumbnail with a graceful placeholder. */
 @Composable
@@ -157,7 +157,7 @@ fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         title = label,
         summary = value,
-        insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = 0.dp, vertical = 10.dp),
+        insideMargin = PaddingValues(horizontal = 0.dp, vertical = 10.dp),
     )
 }
 
@@ -178,6 +178,86 @@ fun MiuixPrimaryButton(
         colors = ButtonDefaults.buttonColorsPrimary(),
     ) {
         Text(text, style = MiuixTheme.textStyles.button, fontWeight = FontWeight.Medium)
+    }
+}
+
+/** MIUI capsule extended floating action button (icon + label). */
+@Composable
+fun MiuixExtendedFloatingActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+) {
+    val container = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.disabledPrimaryButton
+    val content = if (enabled) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.disabledOnPrimaryButton
+    Surface(
+        modifier = modifier.clip(miuixCapsuleShape()).clickable(enabled = enabled, onClick = onClick),
+        shape = miuixCapsuleShape(),
+        color = container,
+        contentColor = content,
+        shadowElevation = 6.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = MiuixTheme.textStyles.button,
+                fontWeight = FontWeight.Medium,
+                color = content,
+            )
+        }
+    }
+}
+
+/**
+ * Fully rounded MIUI segmented control. The selected segment is filled with the
+ * primary color so it stands out clearly from the light gray track.
+ */
+@Composable
+fun MiuixSegmentedControl(
+    options: List<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MiuixTheme.colorScheme.secondaryContainer,
+    ) {
+        Row(modifier = Modifier.padding(3.dp)) {
+            options.forEachIndexed { index, label ->
+                val selected = index == selectedIndex
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(if (selected) MiuixTheme.colorScheme.primary else Color.Transparent)
+                        .clickable { onSelected(index) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = label,
+                        style = MiuixTheme.textStyles.button,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selected) {
+                            MiuixTheme.colorScheme.onPrimary
+                        } else {
+                            MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -286,7 +366,7 @@ fun ErrorState(message: String, onRetry: (() -> Unit)? = null, modifier: Modifie
     }
 }
 
-/** MIUI style outline-less input field. */
+/** MIUI style input field with a floating label. */
 @Composable
 fun MusicTagTextField(
     value: String,
@@ -315,39 +395,31 @@ fun MusicTagTextField(
     )
 }
 
-/** Lightweight MIUI-style overflow menu anchored to a popup. */
+/**
+ * Native MiuiX dropdown list popup. Must be composed inside the trigger layout
+ * (and inside a Scaffold) so MiuiX can anchor and host it.
+ */
 @Composable
 fun MiuixOverflowMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     items: List<Pair<String, () -> Unit>>,
 ) {
-    if (!expanded) return
-    Popup(
+    OverlayListPopup(
+        show = expanded,
         onDismissRequest = onDismissRequest,
-        alignment = Alignment.TopEnd,
-        offset = androidx.compose.ui.unit.IntOffset(0, 0),
-        properties = PopupProperties(focusable = true),
+        maxHeight = 320.dp,
     ) {
-        Card(
-            cornerRadius = 14.dp,
-            colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainerHighest),
-            modifier = Modifier.widthIn(min = 168.dp, max = 260.dp),
-        ) {
-            Column {
-                items.forEach { (label, action) ->
-                    BasicComponent(
-                        title = label,
-                        onClick = {
-                            onDismissRequest()
-                            action()
-                        },
-                        insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    )
-                }
+        ListPopupColumn {
+            items.forEach { (label, action) ->
+                BasicComponent(
+                    title = label,
+                    onClick = {
+                        onDismissRequest()
+                        action()
+                    },
+                )
             }
         }
     }
 }
-
-

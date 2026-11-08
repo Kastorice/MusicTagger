@@ -18,6 +18,8 @@
 
 Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）：`docs/screenshots/07-dynamic-color.png`
 
+点击专辑封面弹出的替换方式选择：`docs/screenshots/08-cover-dialog.png`
+
 ## 功能
 
 - **SAF 文件选择**：支持多选 `mp3 / flac / ogg / opus / m4a(mp4) / aac`，授予持久化访问权限，
@@ -37,8 +39,9 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
     moov 尺寸变化时修正 `stco/co64` 偏移，兼容 faststart。
 - **安全写入**：先写同目录临时文件、fsync、`ATOMIC_MOVE` 原子替换；源文件不可写时自动提示
   「另存为副本」。封面会自动缩放/重新编码，避免把几 MB 的原图塞进音频文件。
-- **MIUI 设计**：MiuiX 大标题顶栏、底部导航、胶囊 FAB、分组卡片、浮动标签输入框、
-  MIUI 开关 / 复选框 / 底部面板 / 对话框；可选 Material You 动态取色；深色模式跟随系统。
+- **MIUI 设计**：MiuiX 大标题顶栏、底部导航、胶囊 FAB、原生列表弹出菜单、分组卡片、浮动标签
+  输入框、蓝色填充分段控件、MIUI 开关 / 复选框 / 底部面板 / 对话框；保存动作是右下角胶囊扩展
+  FAB；点击封面可选择在线匹配 / 本地图片 / 移除；可选 Material You 动态取色；深色模式跟随系统。
 
 ## 技术栈
 

@@ -66,6 +66,22 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 5. 上一版发现并保留的修复：在线封面过大（951 KB → 81 KB 自动缩放重编码）、图片选择器改用
    `ACTION_OPEN_DOCUMENT`、歌词预览截断。
 
+### 本轮 UI 细节打磨（2026-11-08）
+
+- 编辑页：歌曲信息全部改为单列全宽输入框；歌词「在线匹配」改为卡片右下角文本按钮；移除顶栏保存，
+  改为右下角胶囊扩展 FAB（有未保存修改时出现，实测写入 `title=晴天R` 成功、`ffmpeg` 解码 0）；
+  封面卡片只保留「在线匹配所有歌曲信息」图标 + 文字按钮；点击封面弹出替换对话框
+  （在线匹配 / 本地选择 / 移除当前封面）；删除底部「所有修改只写入你选择的本地文件」；
+  返回箭头与顶栏垂直居中。
+- 设置页：移除多余顶栏标题与「保存数据源设置」按钮（输入停顿 700 ms 自动保存，已用 `run-as`
+  校验 SharedPreferences 写入与清空）；分组标题与设置卡片左边缘对齐；使用自绘全圆角、
+  蓝色填充的分段控件替代 TabRow（选中态更突出、无白色残角）；辅助说明文字统一为
+  body2（与设置项描述同字号）；「关于音签」只保留版本 1.0.0 与作者「松川 & DeepSeek」。
+- 曲库页：删除「本地音乐 / 共 N 首」信息行；搜索图标与占位文字增加间距；右上角按钮增大到
+  52 dp 并加大间距；「更多」菜单改为 MiuiX 原生 `OverlayListPopup`；右下角 + 图标改为白色。
+- 所有改动均在 API 36 模拟器逐项操作并截图验证（`docs/screenshots/01`–`08`），
+  154 个单元测试保持全绿。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/debug/app-debug.apk`（约 19.4 MB，debug 签名，minSdk 26 / targetSdk 36）
@@ -81,7 +97,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\emulator.ps1 -Action start
 
 # 3) 安装并生成中文测试音频
-adb -s emulator-5554 install -r app\build\outputs\apk\debug\app-debug.apk
+adb -s emulator-5558 install -r app\build\outputs\apk\debug\app-debug.apk
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\e2e\prepare-media.ps1
 
 # 4) 截图

@@ -44,7 +44,7 @@ import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
-import top.yukonga.miuix.kmp.basic.TabRow
+import com.musictag.app.ui.components.MiuixSegmentedControl
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
@@ -107,10 +107,10 @@ fun OnlineMatchSheet(
                 ) { Text("搜索", style = MiuixTheme.textStyles.button) }
             }
             Spacer(Modifier.height(10.dp))
-            TabRow(
-                tabs = MusicSourceId.entries.map { it.displayName },
-                selectedTabIndex = MusicSourceId.entries.indexOf(state.sourceId).coerceAtLeast(0),
-                onTabSelected = { index -> onSourceChange(MusicSourceId.entries[index]) },
+            MiuixSegmentedControl(
+                options = MusicSourceId.entries.map { it.displayName },
+                selectedIndex = MusicSourceId.entries.indexOf(state.sourceId).coerceAtLeast(0),
+                onSelected = { index -> onSourceChange(MusicSourceId.entries[index]) },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(10.dp))

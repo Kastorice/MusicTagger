@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui
+package com.musictag.app.ui
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,33 +10,38 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.musictag.app.AppContainer
+import com.musictag.app.ui.components.MiuixOverflowMenu
 import com.musictag.app.ui.editor.EditorScreen
 import com.musictag.app.ui.editor.EditorViewModel
 import com.musictag.app.ui.library.LibraryEvent
 import com.musictag.app.ui.library.LibraryScreen
 import com.musictag.app.ui.library.LibraryViewModel
 import com.musictag.app.ui.settings.SettingsScreen
-import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.FabPosition
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
@@ -44,10 +49,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
@@ -55,11 +58,10 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Music
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.icon.extended.Settings
-import com.musictag.app.ui.components.MiuixOverflowMenu
 
 /**
- * App shell in HyperOS style: large-title top bar, bottom [NavigationBar],
- * floating action button and the full-screen editor overlay.
+ * App shell in HyperOS style: large-title top bar for the library, bottom
+ * [NavigationBar], a capsule FAB and the full-screen editor overlay.
  */
 @Composable
 fun MusicTagApp(
@@ -81,7 +83,6 @@ fun MusicTagApp(
     )
     val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
     val settings by container.settingsStore.settings.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var editorUri by rememberSaveable { mutableStateOf<String?>(null) }
@@ -128,13 +129,30 @@ fun MusicTagApp(
                         title = "音签",
                         largeTitle = "音乐",
                         subtitle = "共 ${libraryState.items.size} 首歌曲 · 本地标签编辑",
+                        navigationIconPadding = 0.dp,
+                        actionIconPadding = 0.dp,
                         actions = {
-                            IconButton(onClick = libraryViewModel::refresh) {
-                                Icon(MiuixIcons.Refresh, contentDescription = "刷新")
+                            IconButton(
+                                onClick = libraryViewModel::refresh,
+                                modifier = Modifier.size(52.dp),
+                            ) {
+                                Icon(
+                                    MiuixIcons.Refresh,
+                                    contentDescription = "刷新",
+                                    modifier = Modifier.size(25.dp),
+                                )
                             }
+                            Spacer(Modifier.width(6.dp))
                             Box {
-                                IconButton(onClick = { topMenuExpanded = true }) {
-                                    Icon(MiuixIcons.More, contentDescription = "更多")
+                                IconButton(
+                                    onClick = { topMenuExpanded = true },
+                                    modifier = Modifier.size(52.dp),
+                                ) {
+                                    Icon(
+                                        MiuixIcons.More,
+                                        contentDescription = "更多",
+                                        modifier = Modifier.size(25.dp),
+                                    )
                                 }
                                 MiuixOverflowMenu(
                                     expanded = topMenuExpanded,
@@ -145,10 +163,16 @@ fun MusicTagApp(
                                     ),
                                 )
                             }
+                            Spacer(Modifier.width(8.dp))
                         },
                     )
                 } else {
-                    SmallTopAppBar(title = "设置")
+                    // Settings has no page title; only reserve the status bar.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .windowInsetsTopHeight(WindowInsets.statusBars),
+                    )
                 }
             },
             bottomBar = {
@@ -173,9 +197,10 @@ fun MusicTagApp(
                 if (editorUri == null && tab == 0) {
                     FloatingActionButton(onClick = { filePicker.launch(arrayOf("audio/*")) }) {
                         Icon(
-                            MiuixIcons.Add,
+                            imageVector = MiuixIcons.Add,
                             contentDescription = "添加音乐",
-                            modifier = Modifier.size(26.dp),
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp),
                         )
                     }
                 }
@@ -207,9 +232,6 @@ fun MusicTagApp(
                         onNeteaseApiBaseChange = { base ->
                             container.settingsStore.setNeteaseApiBase(base)
                         },
-                        onMessage = { message ->
-                            scope.launch { snackbarHostState.showSnackbar(message) }
-                        },
                     )
                 }
             }
@@ -232,4 +254,3 @@ fun MusicTagApp(
         }
     }
 }
-
