@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
   Deterministic Gradle wrapper for the MusicTagger project.
@@ -89,7 +89,7 @@ $mutex = New-Object System.Threading.Mutex($false, "Global\MusicTaggerGradleBuil
 $acquired = $false
 try {
     try {
-        $acquired = $mutex.WaitOne([TimeSpan]::FromMinutes(50))
+        $acquired = $mutex.WaitOne([TimeSpan]::FromMinutes(20))
     } catch [System.Threading.AbandonedMutexException] {
         # A previous build process died while holding the lock; ownership is ours now.
         $acquired = $true

@@ -1,4 +1,4 @@
-*.iml
+﻿*.iml
 .gradle/
 /local.properties
 build/
@@ -9,5 +9,5 @@ build/
 .DS_Store
 *.log
 .gradle-build.lock
-screenshots/
+/screenshots/
 /dist/

@@ -16,25 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.musictag.app.R
@@ -53,13 +33,24 @@ import com.musictag.app.data.model.TrackItem
 import com.musictag.app.ui.components.ArtworkCard
 import com.musictag.app.ui.components.EmptyState
 import com.musictag.app.ui.components.FormatBadge
-import com.musictag.app.ui.components.GradientHero
+import com.musictag.app.ui.components.MiuixOverflowMenu
+import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.util.Formats
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.Search
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
     state: LibraryUiState,
+    contentPadding: PaddingValues,
     onAddClick: () -> Unit,
     onAddAllFiles: () -> Unit,
     onRefresh: () -> Unit,
@@ -69,7 +60,6 @@ fun LibraryScreen(
     modifier: Modifier = Modifier,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-
     val filtered = remember(state.items, query) {
         val keyword = query.trim()
         if (keyword.isEmpty()) {
@@ -82,90 +72,72 @@ fun LibraryScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(
-            title = {
-                Column {
-                    Text("音签", style = MaterialTheme.typography.headlineSmall)
-                    Text(
-                        text = "本地音乐标签编辑器",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-            actions = {
-                IconButton(onClick = onRefresh) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "刷新列表")
-                }
-                var addMenuExpanded by remember { mutableStateOf(false) }
-                Box {
-                    IconButton(onClick = { addMenuExpanded = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "更多")
-                    }
-                    DropdownMenu(
-                        expanded = addMenuExpanded,
-                        onDismissRequest = { addMenuExpanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("从所有文件导入") },
-                            onClick = {
-                                addMenuExpanded = false
-                                onAddAllFiles()
-                            },
-                        )
-                    }
-                }
-            },
-        )
+    Column(modifier = modifier.fillMaxSize().padding(contentPadding)) {
         if (state.refreshing) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
         if (state.items.isEmpty() && !state.loading) {
-            EmptyState(
-                icon = R.drawable.ic_music_note,
-                title = "还没有音乐",
-                description = "从本地选择 .mp3 / .flac / .ogg / .opus / .m4a / .aac 音频文件，\n即可编辑标题、歌手、专辑、歌词与封面。",
-                actionLabel = "选择音频文件",
-                onAction = onAddClick,
-                secondaryActionLabel = "从「所有文件」中导入",
-                onSecondaryAction = onAddAllFiles,
-                modifier = Modifier.fillMaxSize(),
-            )
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                EmptyState(
+                    icon = R.drawable.ic_music_note,
+                    title = "还没有音乐",
+                    description = "从本地选择 mp3 / flac / ogg / opus / m4a / aac 音频文件，\n即可编辑标题、歌手、专辑、歌词与封面。",
+                    actionLabel = "选择音频文件",
+                    onAction = onAddClick,
+                    secondaryActionLabel = "从「所有文件」导入",
+                    onSecondaryAction = onAddAllFiles,
+                )
+            }
+        } else if (state.loading && state.items.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                top.yukonga.miuix.kmp.basic.CircularProgressIndicator()
+            }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                item(key = "hero") {
-                    GradientHero(
-                        title = "收藏 ${state.items.size} 首歌曲",
-                        subtitle = "标签与封面将直接写入本地文件 · 不上传任何音频",
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
+                item(key = "summary") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "本地音乐",
+                            style = MiuixTheme.textStyles.subtitle,
+                            color = MiuixTheme.colorScheme.onBackgroundVariant,
+                        )
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = "共 ${state.items.size} 首",
+                            style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.onBackgroundVariant,
+                        )
+                    }
                 }
                 item(key = "search") {
-                    OutlinedTextField(
+                    TextField(
                         value = query,
                         onValueChange = { query = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("搜索标题、歌手或专辑") },
-                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        label = "搜索标题、歌手或专辑",
+                        useLabelAsPlaceholder = true,
                         singleLine = true,
-                        shape = CircleShape,
+                        cornerRadius = 14.dp,
+                        leadingIcon = {
+                            Icon(MiuixIcons.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+                        },
+                        textStyle = MiuixTheme.textStyles.body2,
                     )
                 }
                 if (filtered.isEmpty()) {
                     item(key = "empty-filter") {
                         Text(
                             text = "没有匹配「$query」的歌曲",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             modifier = Modifier.padding(vertical = 24.dp),
                         )
                     }
@@ -196,33 +168,32 @@ private fun TrackRow(
         value = thumbnail(item.uri)
     }
 
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        cornerRadius = 16.dp,
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ArtworkCard(bitmap = bitmap, modifier = Modifier.size(58.dp), corner = 14.dp)
-            Spacer(Modifier.width(14.dp))
+            ArtworkCard(bitmap = bitmap, modifier = Modifier.size(56.dp), corner = 12.dp)
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title?.takeIf { it.isNotBlank() } ?: item.displayName.substringBeforeLast('.'),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MiuixTheme.textStyles.title4,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(3.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = item.secondaryText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(7.dp))
+                Spacer(Modifier.height(6.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -230,41 +201,28 @@ private fun TrackRow(
                     FormatBadge(item.formatName)
                     Text(
                         text = Formats.duration(item.durationMs),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     )
                     Text(
                         text = Formats.fileSize(item.sizeBytes),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     )
                 }
             }
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "更多操作")
+                    Icon(MiuixIcons.More, contentDescription = "更多操作")
                 }
-                DropdownMenu(
+                MiuixOverflowMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("编辑标签") },
-                        leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-                        onClick = {
-                            menuExpanded = false
-                            onClick()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("从列表移除") },
-                        leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
-                        onClick = {
-                            menuExpanded = false
-                            onRemove()
-                        },
-                    )
-                }
+                    items = listOf(
+                        "编辑标签" to onClick,
+                        "从列表移除" to onRemove,
+                    ),
+                )
             }
         }
     }

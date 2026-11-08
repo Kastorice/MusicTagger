@@ -1,4 +1,4 @@
-package com.musictag.app.ui
+﻿package com.musictag.app.ui
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,28 +13,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -46,10 +36,30 @@ import com.musictag.app.ui.library.LibraryEvent
 import com.musictag.app.ui.library.LibraryScreen
 import com.musictag.app.ui.library.LibraryViewModel
 import com.musictag.app.ui.settings.SettingsScreen
+import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.FabPosition
+import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.Music
+import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.extended.Settings
+import com.musictag.app.ui.components.MiuixOverflowMenu
 
 /**
- * App shell: bottom navigation between the library and settings, plus a
- * full-screen editor overlay for the selected track.
+ * App shell in HyperOS style: large-title top bar, bottom [NavigationBar],
+ * floating action button and the full-screen editor overlay.
  */
 @Composable
 fun MusicTagApp(
@@ -57,7 +67,6 @@ fun MusicTagApp(
     pendingUri: Uri?,
     onPendingUriConsumed: () -> Unit,
 ) {
-    val context = LocalContext.current
     val libraryViewModel: LibraryViewModel = viewModel(
         factory = remember(container) {
             viewModelFactory {
@@ -72,9 +81,11 @@ fun MusicTagApp(
     )
     val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
     val settings by container.settingsStore.settings.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var editorUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var topMenuExpanded by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -99,9 +110,7 @@ fun MusicTagApp(
         libraryViewModel.addTracks(listOf(uri), openSingle = true)
     }
 
-    LaunchedEffect(Unit) {
-        container.pruneEditCache()
-    }
+    LaunchedEffect(Unit) { container.pruneEditCache() }
 
     fun closeEditor() {
         val closingUri = editorUri
@@ -113,80 +122,108 @@ fun MusicTagApp(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            topBar = {
+                if (tab == 0) {
+                    TopAppBar(
+                        title = "音签",
+                        largeTitle = "音乐",
+                        subtitle = "共 ${libraryState.items.size} 首歌曲 · 本地标签编辑",
+                        actions = {
+                            IconButton(onClick = libraryViewModel::refresh) {
+                                Icon(MiuixIcons.Refresh, contentDescription = "刷新")
+                            }
+                            Box {
+                                IconButton(onClick = { topMenuExpanded = true }) {
+                                    Icon(MiuixIcons.More, contentDescription = "更多")
+                                }
+                                MiuixOverflowMenu(
+                                    expanded = topMenuExpanded,
+                                    onDismissRequest = { topMenuExpanded = false },
+                                    items = listOf(
+                                        "从所有文件导入" to { filePicker.launch(arrayOf("*/*")) },
+                                        "刷新列表" to { libraryViewModel.refresh() },
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                } else {
+                    SmallTopAppBar(title = "设置")
+                }
+            },
             bottomBar = {
                 if (editorUri == null) {
                     NavigationBar {
                         NavigationBarItem(
                             selected = tab == 0,
                             onClick = { tab = 0 },
-                            icon = {
-                                Icon(
-                                    painter = androidx.compose.ui.res.painterResource(com.musictag.app.R.drawable.ic_music_note),
-                                    contentDescription = null,
-                                )
-                            },
-                            label = { Text("曲库") },
+                            icon = MiuixIcons.Music,
+                            label = "曲库",
                         )
                         NavigationBarItem(
                             selected = tab == 1,
                             onClick = { tab = 1 },
-                            icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
-                            label = { Text("设置") },
+                            icon = MiuixIcons.Settings,
+                            label = "设置",
                         )
                     }
                 }
             },
             floatingActionButton = {
                 if (editorUri == null && tab == 0) {
-                    ExtendedFloatingActionButton(
-                        onClick = { filePicker.launch(arrayOf("audio/*")) },
-                        icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                        text = { Text("添加音乐") },
-                    )
-                }
-            },
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-        ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = padding.calculateBottomPadding()),
-            ) {
-                Crossfade(targetState = tab, label = "tab") { currentTab ->
-                    when (currentTab) {
-                        0 -> LibraryScreen(
-                            state = libraryState,
-                            onAddClick = { filePicker.launch(arrayOf("audio/*")) },
-                            onAddAllFiles = { filePicker.launch(arrayOf("*/*")) },
-                            onRefresh = libraryViewModel::refresh,
-                            onOpen = { uri -> tab = 0; editorUri = uri },
-                            onRemove = libraryViewModel::remove,
-                            thumbnail = { uri -> libraryViewModel.thumbnail(Uri.parse(uri)) },
-                        )
-
-                        else -> SettingsScreen(
-                            settings = settings,
-                            onDynamicColorChange = container.settingsStore::setDynamicColor,
-                            onSourceChange = container.settingsStore::setPreferredSource,
-                            onNeteaseApiBaseChange = { base ->
-                                container.settingsStore.setNeteaseApiBase(base)
-                            },
+                    FloatingActionButton(onClick = { filePicker.launch(arrayOf("audio/*")) }) {
+                        Icon(
+                            MiuixIcons.Add,
+                            contentDescription = "添加音乐",
+                            modifier = Modifier.size(26.dp),
                         )
                     }
+                }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+        ) { padding ->
+            Crossfade(targetState = tab, label = "tab") { currentTab ->
+                if (currentTab == 0) {
+                    LibraryScreen(
+                        state = libraryState,
+                        contentPadding = padding,
+                        onAddClick = { filePicker.launch(arrayOf("audio/*")) },
+                        onAddAllFiles = { filePicker.launch(arrayOf("*/*")) },
+                        onRefresh = libraryViewModel::refresh,
+                        onOpen = { uri ->
+                            tab = 0
+                            editorUri = uri
+                        },
+                        onRemove = libraryViewModel::remove,
+                        thumbnail = { uri -> libraryViewModel.thumbnail(Uri.parse(uri)) },
+                    )
+                } else {
+                    SettingsScreen(
+                        settings = settings,
+                        contentPadding = padding,
+                        onDynamicColorChange = container.settingsStore::setDynamicColor,
+                        onSourceChange = container.settingsStore::setPreferredSource,
+                        onNeteaseApiBaseChange = { base ->
+                            container.settingsStore.setNeteaseApiBase(base)
+                        },
+                        onMessage = { message ->
+                            scope.launch { snackbarHostState.showSnackbar(message) }
+                        },
+                    )
                 }
             }
         }
 
-        // Full-screen editor drawn above the scaffold so the bottom bar is covered.
         AnimatedVisibility(
             visible = editorUri != null,
             enter = slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn(),
             exit = slideOutHorizontally(targetOffsetX = { it / 4 }) + fadeOut(),
         ) {
-            val uri = editorUri
-            if (uri != null) {
+            val currentUri = editorUri
+            if (currentUri != null) {
                 EditorScreen(
-                    uri = uri,
+                    uri = currentUri,
                     viewModel = editorViewModel,
                     onClose = ::closeEditor,
                     onSaved = { item -> libraryViewModel.onTrackOpened(item.uri) },
@@ -195,3 +232,4 @@ fun MusicTagApp(
         }
     }
 }
+

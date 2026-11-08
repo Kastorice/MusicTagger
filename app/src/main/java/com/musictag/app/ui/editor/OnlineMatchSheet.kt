@@ -1,15 +1,14 @@
-package com.musictag.app.ui.editor
+﻿package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -19,30 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -52,30 +28,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.musictag.app.R
 import com.musictag.app.data.model.MatchInfo
 import com.musictag.app.data.model.SearchUiState
 import com.musictag.app.ui.components.ArtworkCard
+import com.musictag.app.ui.components.MiuixPrimaryButton
+import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.ui.components.NetworkCover
+import com.musictag.app.util.Formats
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.TabRow
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
 import com.musictag.core.net.Lrc
 import com.musictag.core.net.MusicSourceId
 import com.musictag.core.net.RemoteSong
-import com.musictag.app.util.Formats
 
 /**
- * Modal sheet for online lyric/cover matching. Results come from NetEase Cloud
- * Music or QQ Music; selecting a hit resolves lyrics and artwork, which can then
- * be applied to the editor draft.
+ * MIUI style bottom sheet for online lyric / cover matching.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnlineMatchSheet(
+    show: Boolean,
     state: SearchUiState,
     previewCover: suspend (ByteArray, Int) -> Bitmap?,
     onDismiss: () -> Unit,
@@ -86,122 +72,67 @@ fun OnlineMatchSheet(
     onBackToResults: () -> Unit,
     onApply: (applyMetadata: Boolean, applyLyrics: Boolean, applyCover: Boolean) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
+    OverlayBottomSheet(
+        show = show,
+        title = "在线匹配",
+        endAction = {
+            IconButton(onClick = onDismiss) {
+                Icon(MiuixIcons.Close, contentDescription = "关闭")
+            }
+        },
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        dragHandle = null,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.92f)
-                .padding(horizontal = 20.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)),
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_cloud_download),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp),
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "在线匹配",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "关闭")
-                }
-            }
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "从网易云音乐 / QQ 音乐搜索歌词与封面，应用后保存即可嵌入文件",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MiuixTheme.textStyles.footnote2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
-            Spacer(Modifier.height(14.dp))
-
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                MusicSourceId.entries.forEachIndexed { index, sourceId ->
-                    SegmentedButton(
-                        selected = state.sourceId == sourceId,
-                        onClick = { onSourceChange(sourceId) },
-                        shape = SegmentedButtonDefaults.itemShape(index, MusicSourceId.entries.size),
-                    ) { Text(sourceId.displayName) }
-                }
-            }
             Spacer(Modifier.height(12.dp))
-
-            val focusManager = LocalFocusManager.current
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
+                MusicTagTextField(
                     value = state.keyword,
                     onValueChange = onKeywordChange,
+                    label = "歌曲名 / 歌手",
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("歌曲名 / 歌手") },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    singleLine = true,
-                    shape = MaterialTheme.shapes.medium,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        focusManager.clearFocus()
-                        onSearch()
-                    }),
+                    labelAsPlaceholder = true,
                 )
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(8.dp))
                 Button(
-                    onClick = {
-                        focusManager.clearFocus()
-                        onSearch()
-                    },
+                    onClick = onSearch,
                     enabled = !state.searching,
-                    shape = MaterialTheme.shapes.medium,
-                ) { Text("搜索") }
+                    cornerRadius = 14.dp,
+                    minHeight = 44.dp,
+                    colors = ButtonDefaults.buttonColorsPrimary(),
+                ) { Text("搜索", style = MiuixTheme.textStyles.button) }
             }
+            Spacer(Modifier.height(10.dp))
+            TabRow(
+                tabs = MusicSourceId.entries.map { it.displayName },
+                selectedTabIndex = MusicSourceId.entries.indexOf(state.sourceId).coerceAtLeast(0),
+                onTabSelected = { index -> onSourceChange(MusicSourceId.entries[index]) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(10.dp))
+
             if (state.error != null && state.selectedSong == null) {
-                Spacer(Modifier.height(10.dp))
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = state.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(12.dp),
-                    )
-                }
+                Text(
+                    text = state.error,
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 6.dp),
+                )
             }
-            Spacer(Modifier.height(12.dp))
 
             val selected = state.selectedSong
             if (selected == null) {
-                ResultsList(
-                    state = state,
-                    onSelect = onSelect,
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                )
+                ResultsArea(state = state, onSelect = onSelect)
             } else {
-                MatchPreview(
+                MatchArea(
                     state = state,
                     previewCover = previewCover,
                     onBackToResults = onBackToResults,
                     onApply = onApply,
-                    modifier = Modifier.fillMaxWidth().weight(1f),
                 )
             }
         }
@@ -209,53 +140,44 @@ fun OnlineMatchSheet(
 }
 
 @Composable
-private fun ResultsList(
+private fun ResultsArea(
     state: SearchUiState,
     onSelect: (RemoteSong) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier) {
-        when {
-            state.searching -> Box(Modifier.fillMaxWidth().height(160.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 3.dp)
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "正在搜索 ${state.sourceId.displayName}…",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+    when {
+        state.searching -> Box(
+            modifier = Modifier.fillMaxWidth().height(180.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "正在搜索 ${state.sourceId.displayName}…",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                )
             }
+        }
 
-            state.results.isEmpty() -> Box(
-                Modifier.fillMaxWidth().height(180.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_auto_awesome),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                        modifier = Modifier.size(36.dp),
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        "输入歌曲名或歌手开始搜索",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
+        state.results.isEmpty() -> Box(
+            modifier = Modifier.fillMaxWidth().height(180.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "输入歌曲名或歌手开始搜索",
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            )
+        }
 
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxHeight(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                items(items = state.results, key = { it.source.name + it.id }) { song ->
-                    ResultRow(song = song, onClick = { onSelect(song) })
-                }
+        else -> LazyColumn(
+            modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            items(items = state.results, key = { it.source.name + it.id }) { song ->
+                ResultRow(song = song, onClick = { onSelect(song) })
             }
         }
     }
@@ -266,258 +188,197 @@ private fun ResultRow(song: RemoteSong, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 8.dp),
+            .padding(horizontal = 6.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        NetworkCover(url = song.coverUrl, modifier = Modifier.size(46.dp), corner = 10.dp)
+        NetworkCover(url = song.coverUrl, modifier = Modifier.size(44.dp), corner = 10.dp)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = song.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
+                style = MiuixTheme.textStyles.body1,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = song.subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MiuixTheme.textStyles.footnote2,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
         Text(
             text = Formats.duration(song.durationMs),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         )
     }
 }
 
 @Composable
-private fun MatchPreview(
+private fun MatchArea(
     state: SearchUiState,
     previewCover: suspend (ByteArray, Int) -> Bitmap?,
     onBackToResults: () -> Unit,
     onApply: (Boolean, Boolean, Boolean) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val match: MatchInfo? = state.match
-    var applyMetadata by remember(match) { mutableStateOf(true) }
-    var applyLyrics by remember(match) { mutableStateOf(true) }
-    var applyCover by remember(match) { mutableStateOf(true) }
+    var applyMetadata by remember(match?.song?.id) { mutableStateOf(true) }
+    var applyLyrics by remember(match?.song?.id) { mutableStateOf(true) }
+    var applyCover by remember(match?.song?.id) { mutableStateOf(true) }
 
     val coverBitmap by produceState<Bitmap?>(initialValue = null, key1 = match?.cover?.bytes) {
         value = match?.cover?.bytes?.let { previewCover(it, 320) }
     }
 
-    Column(modifier = modifier.fillMaxHeight()) {
-        if (state.loadingMatch) {
-            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(modifier = Modifier.size(36.dp), strokeWidth = 3.dp)
-                    Spacer(Modifier.height(12.dp))
-                    Text("正在获取歌词与封面…", style = MaterialTheme.typography.bodySmall)
-                }
+    if (state.loadingMatch) {
+        Box(Modifier.fillMaxWidth().height(220.dp), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = "正在获取歌词与封面…",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                )
             }
-        } else if (match != null) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp),
-            ) {
-                item {
-                    Row(verticalAlignment = Alignment.Top) {
-                        if (coverBitmap != null) {
-                            Image(
-                                bitmap = coverBitmap!!.asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(112.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                            )
-                        } else {
-                            ArtworkCard(
-                                bitmap = null,
-                                modifier = Modifier.size(112.dp),
-                                corner = 18.dp,
-                                placeholderIcon = R.drawable.ic_album,
-                            )
-                        }
-                        Spacer(Modifier.width(14.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                text = match.song.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = match.song.subtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Surface(
-                                shape = MaterialTheme.shapes.small,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ) {
-                                Text(
-                                    text = match.song.source.displayName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                }
+        }
+        return
+    }
 
-                if (match.error != null) {
-                    item {
-                        Surface(
-                            shape = MaterialTheme.shapes.medium,
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = match.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.padding(12.dp),
-                            )
-                        }
-                    }
-                }
+    if (match == null) {
+        Text(
+            text = "未找到匹配结果",
+            style = MiuixTheme.textStyles.body2,
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.padding(vertical = 20.dp),
+        )
+        return
+    }
 
-                item {
-                    Text("歌词预览", style = MaterialTheme.typography.titleSmall)
-                    Spacer(Modifier.height(6.dp))
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth().heightIn(max = 470.dp),
+        contentPadding = PaddingValues(bottom = 8.dp),
+    ) {
+        item {
+            Row(verticalAlignment = Alignment.Top) {
+                if (coverBitmap != null) {
+                    androidx.compose.foundation.Image(
+                        bitmap = coverBitmap!!.asImageBitmap(),
+                        contentDescription = null,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 96.dp, max = 220.dp),
-                    ) {
-                        val plain = if (match.hasLyrics) {
-                            Lrc.plainText(match.lyrics?.lrc).lineSequence()
-                                .filter { it.isNotBlank() }
-                                .take(12)
-                                .joinToString("\n")
-                        } else {
-                            ""
-                        }
-                        Text(
-                            text = if (plain.isBlank()) {
-                                "未找到歌词，可尝试切换数据源或换一个搜索结果。"
-                            } else {
-                                "$plain\n…"
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (plain.isBlank()) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                            modifier = Modifier.padding(12.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(16.dp))
+                            .size(96.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MiuixTheme.colorScheme.secondaryContainer),
+                    )
+                } else {
+                    ArtworkCard(
+                        bitmap = null,
+                        modifier = Modifier.size(96.dp),
+                        corner = 16.dp,
+                        placeholderIcon = R.drawable.ic_album,
+                    )
                 }
-
-                item {
-                    ApplyOption(
-                        title = "填充歌曲信息",
-                        subtitle = "${match.song.title} · ${match.song.artists}",
-                        checked = applyMetadata,
-                        enabled = true,
-                        onCheckedChange = { applyMetadata = it },
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = match.song.title,
+                        style = MiuixTheme.textStyles.title4,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    ApplyOption(
-                        title = "应用歌词",
-                        subtitle = if (match.hasLyrics) "将写入 LRC 歌词标签" else "该来源没有歌词",
-                        checked = applyLyrics && match.hasLyrics,
-                        enabled = match.hasLyrics,
-                        onCheckedChange = { applyLyrics = it },
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = match.song.subtitle,
+                        style = MiuixTheme.textStyles.body2,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     )
-                    ApplyOption(
-                        title = "应用专辑封面",
-                        subtitle = if (match.hasCover) "将替换当前封面" else "该来源没有封面",
-                        checked = applyCover && match.hasCover,
-                        enabled = match.hasCover,
-                        onCheckedChange = { applyCover = it },
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = match.song.source.displayName,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.primary,
                     )
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Spacer(Modifier.height(12.dp))
+            if (match.error != null) {
+                Text(
+                    text = match.error,
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.error,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+            Text("歌词预览", style = MiuixTheme.textStyles.subtitle)
+            Spacer(Modifier.height(6.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp, max = 150.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MiuixTheme.colorScheme.secondaryContainer,
             ) {
-                TextButton(onClick = onBackToResults) { Text("返回结果") }
-                Spacer(Modifier.weight(1f))
-                Button(
-                    onClick = {
-                        onApply(
-                            applyMetadata,
-                            applyLyrics && match.hasLyrics,
-                            applyCover && match.hasCover,
-                        )
-                    },
-                ) { Text("应用到编辑内容") }
+                val plain = if (match.hasLyrics) {
+                    Lrc.plainText(match.lyrics?.lrc).lineSequence()
+                        .filter { it.isNotBlank() }
+                        .take(8)
+                        .joinToString("\n")
+                } else {
+                    ""
+                }
+                Text(
+                    text = if (plain.isBlank()) "未找到歌词，可尝试切换数据源或换一个搜索结果。" else "$plain\n…",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(12.dp),
+                )
             }
-        } else {
-            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                Text("未找到匹配结果", style = MaterialTheme.typography.bodyMedium)
-            }
+            Spacer(Modifier.height(10.dp))
+        }
+        item {
+            CheckboxPreference(
+                title = "填充歌曲信息",
+                summary = "${match.song.title} · ${match.song.artists}",
+                checked = applyMetadata,
+                onCheckedChange = { applyMetadata = it },
+                insideMargin = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
+            )
+            CheckboxPreference(
+                title = "应用歌词",
+                summary = if (match.hasLyrics) "将写入 LRC 歌词标签" else "该来源没有歌词",
+                checked = applyLyrics && match.hasLyrics,
+                onCheckedChange = { applyLyrics = it },
+                enabled = match.hasLyrics,
+                insideMargin = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
+            )
+            CheckboxPreference(
+                title = "应用专辑封面",
+                summary = if (match.hasCover) "将替换当前封面" else "该来源没有封面",
+                checked = applyCover && match.hasCover,
+                onCheckedChange = { applyCover = it },
+                enabled = match.hasCover,
+                insideMargin = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
+            )
         }
     }
-}
 
-@Composable
-private fun ApplyOption(
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(enabled = enabled) { onCheckedChange(!checked) }
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = if (enabled) onCheckedChange else null,
-            enabled = enabled,
+        TextButton(text = "返回结果", onClick = onBackToResults, minHeight = 40.dp)
+        Spacer(Modifier.weight(1f))
+        MiuixPrimaryButton(
+            text = "应用到编辑内容",
+            onClick = {
+                onApply(
+                    applyMetadata,
+                    applyLyrics && match.hasLyrics,
+                    applyCover && match.hasCover,
+                )
+            },
         )
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (enabled) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                },
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
     }
 }

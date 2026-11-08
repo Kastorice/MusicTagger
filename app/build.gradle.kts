@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+﻿import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.musictag.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.musictag.app"
@@ -64,22 +64,24 @@ dependencies {
     implementation(project(":core"))
 
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.activity:activity-compose:1.11.0")
+    implementation("androidx.activity:activity-compose:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
-    implementation("androidx.compose.ui:ui:1.9.1")
-    implementation("androidx.compose.ui:ui-graphics:1.9.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.9.1")
-    implementation("androidx.compose.foundation:foundation:1.9.1")
-    implementation("androidx.compose.animation:animation:1.9.1")
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.compose.material:material-icons-core:1.7.8")
+    implementation("androidx.compose.ui:ui:1.10.3")
+    implementation("androidx.compose.ui:ui-graphics:1.10.3")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.10.3")
+    implementation("androidx.compose.foundation:foundation:1.10.3")
+    implementation("androidx.compose.animation:animation:1.10.3")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.9.1")
+    // MiuiX (HyperOS style UI), built against Compose 1.10.3 / Kotlin 2.3.20.
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.0")
+    implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.0")
+    implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.10.3")
 
     testImplementation("junit:junit:4.13.2")
 }
