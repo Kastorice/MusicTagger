@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.musictag.app.R
@@ -41,6 +42,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
@@ -100,32 +102,39 @@ fun LibraryScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item(key = "search") {
-                    MiuixSearchField(
-                        value = query,
-                        onValueChange = { query = it },
-                        placeholder = "搜索标题、歌手或专辑",
-                        onClear = { query = "" },
-                    )
+                    val keyboard = LocalSoftwareKeyboardController.current
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        MiuixSearchField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = "搜索标题、歌手或专辑",
+                            modifier = Modifier.weight(1f),
+                            onClear = { query = "" },
+                        )
+                        if (query.isNotEmpty()) {
+                            Spacer(Modifier.width(4.dp))
+                            TextButton(
+                                text = "取消",
+                                onClick = {
+                                    query = ""
+                                    keyboard?.hide()
+                                },
+                                minHeight = 40.dp,
+                            )
+                        }
+                    }
                 }
-                if (filtered.isEmpty()) {
-                    item(key = "empty-filter") {
-                        Text(
-                            text = "没有匹配「$query」的歌曲",
-                            style = MiuixTheme.textStyles.body2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            modifier = Modifier.padding(vertical = 24.dp),
-                        )
-                    }
-                } else {
-                    items(items = filtered, key = { it.uri }) { item ->
-                        TrackRow(
-                            item = item,
-                            thumbnail = thumbnail,
-                            onClick = { onOpen(item.uri) },
-                            onOpenWith = { onOpenWith(item) },
-                            onRemove = { onRemove(item.uri) },
-                        )
-                    }
+                items(items = filtered, key = { it.uri }) { item ->
+                    TrackRow(
+                        item = item,
+                        thumbnail = thumbnail,
+                        onClick = { onOpen(item.uri) },
+                        onOpenWith = { onOpenWith(item) },
+                        onRemove = { onRemove(item.uri) },
+                    )
                 }
             }
         }

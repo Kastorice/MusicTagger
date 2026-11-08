@@ -30,6 +30,9 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
 
 关于音签与 GitHub 链接：`docs/screenshots/13-about.png`
 
+曲库搜索（实时过滤，输入框内清除 + 右侧取消；无结果时不显示任何占位文案）：
+`docs/screenshots/14-search.png` / `docs/screenshots/15-search-empty.png`
+
 ## 功能
 
 - **SAF 文件选择**：支持多选 `mp3 / flac / ogg / opus / m4a(mp4) / aac`，授予持久化访问权限，

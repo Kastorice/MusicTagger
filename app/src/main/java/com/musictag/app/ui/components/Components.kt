@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TransformOrigin
@@ -206,11 +207,14 @@ fun MiuixExtendedFloatingActionButton(
     val container = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.disabledPrimaryButton
     val content = if (enabled) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.disabledOnPrimaryButton
     Surface(
-        modifier = modifier.clip(miuixCapsuleShape()).clickable(enabled = enabled, onClick = onClick),
+        modifier = modifier
+            .shadow(elevation = 14.dp, shape = miuixCapsuleShape(), clip = false)
+            .clip(miuixCapsuleShape())
+            .clickable(enabled = enabled, onClick = onClick),
         shape = miuixCapsuleShape(),
         color = container,
         contentColor = content,
-        shadowElevation = 10.dp,
+        shadowElevation = 12.dp,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),

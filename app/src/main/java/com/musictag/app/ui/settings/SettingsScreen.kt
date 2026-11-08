@@ -34,7 +34,6 @@ import com.musictag.core.net.MusicSourceId
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
@@ -144,14 +143,21 @@ fun SettingsScreen(
 
             item {
                 SettingsGroup(title = "关于音签") {
-                    BasicComponent(title = "版本", summary = BuildConfig.VERSION_NAME)
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    BasicComponent(title = "作者", summary = "松川 & DeepSeek")
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    BasicComponent(
+                        title = "版本",
+                        summary = BuildConfig.VERSION_NAME,
+                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    )
+                    BasicComponent(
+                        title = "作者",
+                        summary = "松川 & DeepSeek",
+                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    )
                     BasicComponent(
                         title = "GitHub",
                         summary = "Kastorice/MusicTagger",
                         onClick = onOpenGithub,
+                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                         endActions = {
                             Icon(
                                 imageVector = MiuixIcons.ChevronForward,

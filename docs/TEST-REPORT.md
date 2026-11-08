@@ -144,6 +144,18 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - 应用图标 glyph 下移，使三条横杠在圆形安全区内视觉居中。
 - 验证：截图更新为 `docs/screenshots/01`–`13`；`:app:assembleDebug` 通过，154 个单测保持全绿。
 
+### 第六轮搜索与细节调整（2026-11-08）
+
+- 曲库搜索改为参考 KernelSU 搜索页：搜索框（带内嵌清除按钮）+ 右侧「取消」，
+  输入实时过滤；**无结果时列表区域完全留空**（删除原来的「没有匹配…」占位文字）。
+  截图：`docs/screenshots/14-search.png`、`15-search-empty.png`。
+- 设置页「关于音签」去掉所有分割线，改为与「文件信息」一致的行式布局
+  （BasicComponent：16 sp Medium 标题 + 13 sp 描述，行内边距 16×10 dp），GitHub 行保留右侧 chevron。
+  截图：`docs/screenshots/13-about.png`。
+- 「保存到文件」胶囊 FAB 增加真实绘制阴影：`Modifier.shadow(14 dp)` + `Surface(shadowElevation = 12 dp)`，
+  常驻右下角。截图：`docs/screenshots/02-editor.png`。
+- 验证：`:app:assembleDebug` 通过；模拟器逐项截图确认。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/debug/app-debug.apk`（约 19.4 MB，debug 签名，minSdk 26 / targetSdk 36）
