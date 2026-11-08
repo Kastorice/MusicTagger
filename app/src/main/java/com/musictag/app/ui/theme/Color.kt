@@ -1,0 +1,78 @@
+package com.musictag.app.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Brand palette: violet primary, teal accent, coral tertiary.
+val VioletPrimary = Color(0xFF6B4EFF)
+val VioletOnPrimary = Color(0xFFFFFFFF)
+val VioletPrimaryContainer = Color(0xFFE8DEFF)
+val VioletOnPrimaryContainer = Color(0xFF1E0061)
+
+val TealSecondary = Color(0xFF00A896)
+val TealOnSecondary = Color(0xFFFFFFFF)
+val TealSecondaryContainer = Color(0xFFB6F5EC)
+val TealOnSecondaryContainer = Color(0xFF00201C)
+
+val CoralTertiary = Color(0xFFFF7043)
+val CoralOnTertiary = Color(0xFFFFFFFF)
+val CoralTertiaryContainer = Color(0xFFFFDBD1)
+val CoralOnTertiaryContainer = Color(0xFF3B0900)
+
+val ErrorLight = Color(0xFFBA1A1A)
+val OnErrorLight = Color(0xFFFFFFFF)
+val ErrorContainerLight = Color(0xFFFFDAD6)
+val OnErrorContainerLight = Color(0xFF410002)
+
+val BackgroundLight = Color(0xFFFDF8FF)
+val OnBackgroundLight = Color(0xFF1C1B22)
+val SurfaceLight = Color(0xFFFDF8FF)
+val OnSurfaceLight = Color(0xFF1C1B22)
+val SurfaceVariantLight = Color(0xFFE7E0F0)
+val OnSurfaceVariantLight = Color(0xFF49454F)
+val OutlineLight = Color(0xFF79747E)
+val OutlineVariantLight = Color(0xFFCAC4D0)
+val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
+val SurfaceContainerLowLight = Color(0xFFF7F2FA)
+val SurfaceContainerLight = Color(0xFFF1ECF4)
+val SurfaceContainerHighLight = Color(0xFFEBE5F0)
+val SurfaceContainerHighestLight = Color(0xFFE6DFE9)
+val InverseSurfaceLight = Color(0xFF313038)
+val InverseOnSurfaceLight = Color(0xFFF3EFF7)
+val InversePrimaryLight = Color(0xFFC9BFFF)
+
+val VioletPrimaryDark = Color(0xFFC9BFFF)
+val VioletOnPrimaryDark = Color(0xFF2E0096)
+val VioletPrimaryContainerDark = Color(0xFF4A2ECC)
+val VioletOnPrimaryContainerDark = Color(0xFFE8DEFF)
+
+val TealSecondaryDark = Color(0xFF57DBCB)
+val TealOnSecondaryDark = Color(0xFF003731)
+val TealSecondaryContainerDark = Color(0xFF005048)
+val TealOnSecondaryContainerDark = Color(0xFF74F8E2)
+
+val CoralTertiaryDark = Color(0xFFFFB59E)
+val CoralOnTertiaryDark = Color(0xFF5F1600)
+val CoralTertiaryContainerDark = Color(0xFF872100)
+val CoralOnTertiaryContainerDark = Color(0xFFFFDBD1)
+
+val ErrorDark = Color(0xFFFFB4AB)
+val OnErrorDark = Color(0xFF690005)
+val ErrorContainerDark = Color(0xFF93000A)
+val OnErrorContainerDark = Color(0xFFFFDAD6)
+
+val BackgroundDark = Color(0xFF141219)
+val OnBackgroundDark = Color(0xFFE6E0E9)
+val SurfaceDark = Color(0xFF141219)
+val OnSurfaceDark = Color(0xFFE6E0E9)
+val SurfaceVariantDark = Color(0xFF49454F)
+val OnSurfaceVariantDark = Color(0xFFCAC4D0)
+val OutlineDark = Color(0xFF938F99)
+val OutlineVariantDark = Color(0xFF49454F)
+val SurfaceContainerLowestDark = Color(0xFF0F0D13)
+val SurfaceContainerLowDark = Color(0xFF1C1A21)
+val SurfaceContainerDark = Color(0xFF201E25)
+val SurfaceContainerHighDark = Color(0xFF2B292F)
+val SurfaceContainerHighestDark = Color(0xFF36343B)
+val InverseSurfaceDark = Color(0xFFE6E0E9)
+val InverseOnSurfaceDark = Color(0xFF313038)
+val InversePrimaryDark = Color(0xFF6B4EFF)
