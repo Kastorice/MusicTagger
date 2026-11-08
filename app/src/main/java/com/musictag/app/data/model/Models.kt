@@ -27,6 +27,12 @@ data class TrackItem(
     val mimeType: String? = null,
     val sizeBytes: Long? = null,
     val formatName: String? = null,
+    val bitrateKbps: Int? = null,
+    val sampleRateHz: Int? = null,
+    val channels: Int? = null,
+    val location: String? = null,
+    /** Bumped after a save so the list knows its cached artwork is stale. */
+    val modifiedAt: Long = 0L,
 ) {
     val uriObject: Uri get() = Uri.parse(uri)
 
@@ -46,6 +52,10 @@ data class LoadedTrack(
     val formatName: String?,
     val sizeBytes: Long,
     val durationMs: Long?,
+    val bitrateKbps: Int? = null,
+    val sampleRateHz: Int? = null,
+    val channels: Int? = null,
+    val location: String? = null,
 ) {
     val uriObject: Uri get() = Uri.parse(uri)
 }

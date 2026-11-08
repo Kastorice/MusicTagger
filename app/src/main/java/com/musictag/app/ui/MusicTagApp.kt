@@ -253,6 +253,17 @@ fun MusicTagApp(
                         onNeteaseApiBaseChange = { base ->
                             container.settingsStore.setNeteaseApiBase(base)
                         },
+                        onOpenGithub = {
+                            val link = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/Kastorice/MusicTagger"),
+                            )
+                            try {
+                                context.startActivity(link)
+                            } catch (_: ActivityNotFoundException) {
+                                scope.launch { snackbarHostState.showSnackbar("无法打开浏览器") }
+                            }
+                        },
                     )
                 }
             }

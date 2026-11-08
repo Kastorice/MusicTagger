@@ -51,6 +51,11 @@ class ArtworkRepository(private val context: Context) {
         }
     }
 
+    /** Drops the cached list thumbnail for [uri] after its cover was rewritten. */
+    fun invalidateThumbnail(uri: String) {
+        cache.remove("thumb:$uri:320")
+    }
+
     fun clear() = cache.evictAll()
 
     /**

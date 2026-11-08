@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.editor
+package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -82,27 +84,28 @@ fun OnlineMatchSheet(
         },
         onDismissRequest = onDismiss,
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "从网易云音乐 / QQ 音乐搜索歌词与封面，应用后保存即可嵌入文件",
-                style = MiuixTheme.textStyles.footnote2,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-            )
-            Spacer(Modifier.height(12.dp))
+        var keywordDraft by remember(show) { mutableStateOf(state.keyword) }
+        LaunchedEffect(show) {
+            if (show) keywordDraft = state.keyword
+        }
+        Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MusicTagTextField(
-                    value = state.keyword,
-                    onValueChange = onKeywordChange,
+                    value = keywordDraft,
+                    onValueChange = { keywordDraft = it },
                     label = "歌曲名 / 歌手",
                     modifier = Modifier.weight(1f),
                     labelAsPlaceholder = true,
                 )
                 Spacer(Modifier.width(8.dp))
                 Button(
-                    onClick = onSearch,
+                    onClick = {
+                        onKeywordChange(keywordDraft)
+                        onSearch()
+                    },
                     enabled = !state.searching,
                     cornerRadius = 14.dp,
-                    minHeight = 44.dp,
+                    minHeight = 46.dp,
                     colors = ButtonDefaults.buttonColorsPrimary(),
                 ) { Text("搜索", style = MiuixTheme.textStyles.button) }
             }
@@ -110,7 +113,10 @@ fun OnlineMatchSheet(
             MiuixSegmentedControl(
                 options = MusicSourceId.entries.map { it.displayName },
                 selectedIndex = MusicSourceId.entries.indexOf(state.sourceId).coerceAtLeast(0),
-                onSelected = { index -> onSourceChange(MusicSourceId.entries[index]) },
+                onSelected = { index ->
+                    onKeywordChange(keywordDraft)
+                    onSourceChange(MusicSourceId.entries[index])
+                },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(10.dp))

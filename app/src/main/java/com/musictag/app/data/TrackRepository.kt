@@ -1,8 +1,11 @@
 package com.musictag.app.data
 
 import android.content.Context
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.provider.DocumentsContract
 import com.musictag.app.data.model.AddTracksResult
 import com.musictag.app.data.model.LoadedTrack
 import com.musictag.app.data.model.OpenedTrack
@@ -66,7 +69,7 @@ class TrackRepository(
     /** Refreshes a single item; returns the existing item when the document is gone. */
     suspend fun refreshItem(item: TrackItem): TrackItem = withContext(Dispatchers.IO) {
         try {
-            describe(item.uriObject)
+            describe(item.uriObject).copy(modifiedAt = System.currentTimeMillis())
         } catch (_: Exception) {
             item
         }
@@ -89,6 +92,10 @@ class TrackRepository(
                 formatName = formatName,
                 sizeBytes = info.sizeBytes ?: cacheFile.length(),
                 durationMs = technical.durationMs,
+                bitrateKbps = technical.bitrateKbps,
+                sampleRateHz = technical.sampleRateHz,
+                channels = technical.channels,
+                location = locationOf(uri),
             )
             OpenedTrack(track = loaded, document = document, artwork = artwork)
         } catch (e: Exception) {
@@ -126,7 +133,8 @@ class TrackRepository(
                 describe(uri)
             } catch (_: Exception) {
                 TrackItem(uri = uri.toString(), displayName = cacheFile.name, formatName = null)
-            }
+            }.copy(modifiedAt = System.currentTimeMillis())
+            artworkRepository.invalidateThumbnail(uri.toString())
             updateLibraryItem(item)
             SaveOutcome.Saved(item = item, artwork = document.artwork)
         }
@@ -183,6 +191,10 @@ class TrackRepository(
             mimeType = mimeType,
             sizeBytes = info.sizeBytes,
             formatName = formatNameFor(displayName),
+            bitrateKbps = technical.bitrateKbps,
+            sampleRateHz = technical.sampleRateHz,
+            channels = technical.channels,
+            location = locationOf(uri),
         )
     }
 
@@ -192,7 +204,25 @@ class TrackRepository(
         val album: String? = null,
         val durationMs: Long? = null,
         val mimeType: String? = null,
+        val bitrateKbps: Int? = null,
+        val sampleRateHz: Int? = null,
+        val channels: Int? = null,
     )
+
+    /** Human readable SAF location, e.g. "内部存储/Music/sunny.mp3". */
+    private fun locationOf(uri: Uri): String? = try {
+        if (uri.scheme == "content") {
+            val documentId = DocumentsContract.getDocumentId(uri)
+            documentId
+                .removePrefix("raw:")
+                .replaceFirst("primary:", "内部存储/")
+                .replace(":", "/")
+        } else {
+            uri.path
+        }
+    } catch (_: Exception) {
+        uri.toString()
+    }
 
     private fun readTechnicalInfo(uri: Uri): TechnicalInfo {
         val retriever = MediaMetadataRetriever()
@@ -212,6 +242,11 @@ class TrackRepository(
                 durationMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
                     ?.toLongOrNull(),
                 mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE),
+                bitrateKbps = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
+                    ?.toLongOrNull()?.let { (it / 1000).toInt() },
+                sampleRateHz = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)
+                    ?.toIntOrNull(),
+                channels = readChannels(uri),
             )
         } catch (_: Exception) {
             TechnicalInfo()
@@ -220,6 +255,30 @@ class TrackRepository(
                 retriever.release()
             } catch (_: Exception) {
             }
+        }
+    }
+
+    private fun readChannels(uri: Uri): Int? {
+        val extractor = MediaExtractor()
+        return try {
+            if (uri.scheme == "content") {
+                extractor.setDataSource(context, uri, null)
+            } else {
+                extractor.setDataSource(uri.path ?: return null)
+            }
+            (0 until extractor.trackCount).firstNotNullOfOrNull { index ->
+                val format = extractor.getTrackFormat(index)
+                val mime = format.getString(MediaFormat.KEY_MIME)
+                if (mime?.startsWith("audio/") == true) {
+                    runCatching { format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) }.getOrNull()
+                } else {
+                    null
+                }
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            runCatching { extractor.release() }
         }
     }
 

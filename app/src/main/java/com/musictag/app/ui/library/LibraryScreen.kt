@@ -104,6 +104,7 @@ fun LibraryScreen(
                         value = query,
                         onValueChange = { query = it },
                         placeholder = "搜索标题、歌手或专辑",
+                        onClear = { query = "" },
                     )
                 }
                 if (filtered.isEmpty()) {
@@ -140,7 +141,7 @@ private fun TrackRow(
     onRemove: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
-    val bitmap by produceState<Bitmap?>(initialValue = null, item.uri) {
+    val bitmap by produceState<Bitmap?>(initialValue = null, item.uri, item.modifiedAt) {
         value = thumbnail(item.uri)
     }
 

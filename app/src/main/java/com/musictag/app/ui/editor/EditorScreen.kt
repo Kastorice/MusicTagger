@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +43,6 @@ import com.musictag.app.ui.components.ErrorState
 import com.musictag.app.ui.components.InfoRow
 import com.musictag.app.ui.components.LoadingState
 import com.musictag.app.ui.components.MiuixExtendedFloatingActionButton
-import com.musictag.app.ui.components.MiuixSectionCard
 import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.util.Formats
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -53,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
@@ -64,6 +66,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Download
 import top.yukonga.miuix.kmp.icon.extended.Search
+import kotlinx.coroutines.launch
 
 /**
  * Full screen tag editor, MIUI/HyperOS style. The save action is a capsule
@@ -80,6 +83,7 @@ fun EditorScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showCoverDialog by remember { mutableStateOf(false) }
     var pendingSaveAsName by remember { mutableStateOf<String?>(null) }
@@ -143,10 +147,16 @@ fun EditorScreen(
             )
         },
         floatingActionButton = {
-            if (state.hasChanges && state.track != null) {
+            if (state.track != null) {
                 MiuixExtendedFloatingActionButton(
                     text = if (state.saving) "保存中…" else "保存到文件",
-                    onClick = viewModel::save,
+                    onClick = {
+                        if (state.hasChanges) {
+                            viewModel.save()
+                        } else {
+                            scope.launch { snackbarHostState.showSnackbar("没有需要保存的修改") }
+                        }
+                    },
                     enabled = !state.saving,
                     icon = MiuixIcons.Download,
                 )
@@ -172,9 +182,8 @@ fun EditorScreen(
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
                         item(key = "artwork") {
-                            Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 18.dp) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                            EditorSection(title = "专辑封面") {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                         Box(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(16.dp))
@@ -235,12 +244,11 @@ fun EditorScreen(
                                             fontWeight = FontWeight.Medium,
                                         )
                                     }
-                                }
                             }
                         }
 
                         item(key = "tags") {
-                            MiuixSectionCard(title = "歌曲信息") {
+                            EditorSection(title = "歌曲信息") {
                                 MusicTagTextField(
                                     value = state.fields.title,
                                     onValueChange = { viewModel.updateField(EditorField.TITLE, it) },
@@ -298,7 +306,7 @@ fun EditorScreen(
                         }
 
                         item(key = "lyrics") {
-                            MiuixSectionCard(title = "歌词") {
+                            EditorSection(title = "歌词") {
                                 MusicTagTextField(
                                     value = state.fields.lyrics,
                                     onValueChange = { viewModel.updateField(EditorField.LYRICS, it) },
@@ -334,12 +342,16 @@ fun EditorScreen(
                         }
 
                         item(key = "fileinfo") {
-                            MiuixSectionCard(title = "文件信息") {
+                            EditorSection(title = "文件信息") {
                                 InfoRow("格式", track.formatName ?: "未知")
                                 InfoRow("时长", Formats.duration(track.durationMs))
                                 InfoRow("大小", Formats.fileSize(track.sizeBytes))
+                                InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
+                                InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
+                                InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
                                 InfoRow("类型", track.mimeType ?: "未知")
                                 InfoRow("文件名", track.displayName)
+                                InfoRow("文件位置", track.location ?: "未知")
                             }
                         }
                     }
@@ -431,3 +443,20 @@ fun EditorScreen(
 
 @Suppress("unused")
 private val unusedR = R.drawable.ic_music_note
+
+/** Section label placed above its white card, matching the settings layout. */
+@Composable
+private fun EditorSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SmallTitle(
+            text = title,
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, bottom = 6.dp),
+        )
+        Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
+            Column(modifier = Modifier.padding(16.dp)) { content() }
+        }
+    }
+}

@@ -37,6 +37,7 @@ class LibraryViewModel(
 
     fun refresh() {
         viewModelScope.launch {
+            artworkRepository.clear()
             val cached = repository.libraryItems()
             _state.update { it.copy(items = cached, loading = cached.isEmpty(), refreshing = cached.isNotEmpty()) }
             if (cached.isEmpty()) {

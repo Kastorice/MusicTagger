@@ -53,10 +53,12 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
@@ -208,15 +210,15 @@ fun MiuixExtendedFloatingActionButton(
         shape = miuixCapsuleShape(),
         color = container,
         contentColor = content,
-        shadowElevation = 6.dp,
+        shadowElevation = 10.dp,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 22.dp, vertical = 13.dp),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (icon != null) {
-                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
+                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(22.dp))
+                Spacer(Modifier.width(9.dp))
             }
             Text(
                 text = text,
@@ -419,6 +421,7 @@ fun MiuixSearchField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    onClear: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -460,6 +463,17 @@ fun MiuixSearchField(
                     ) { innerTextField() }
                 },
             )
+        }
+        if (onClear != null && value.isNotEmpty()) {
+            Spacer(Modifier.width(4.dp))
+            IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    imageVector = MiuixIcons.Close,
+                    contentDescription = "清除搜索内容",
+                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
     }
 }

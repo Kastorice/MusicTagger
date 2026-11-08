@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
 import com.musictag.app.BuildConfig
 import com.musictag.app.data.model.AppSettings
 import com.musictag.app.ui.components.MiuixSegmentedControl
@@ -34,8 +35,11 @@ import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.ChevronForward
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -46,6 +50,7 @@ fun SettingsScreen(
     onDynamicColorChange: (Boolean) -> Unit,
     onSourceChange: (MusicSourceId) -> Unit,
     onNeteaseApiBaseChange: (String) -> Unit,
+    onOpenGithub: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var apiBaseDraft by remember(settings.neteaseApiBase) { mutableStateOf(settings.neteaseApiBase) }
@@ -142,6 +147,20 @@ fun SettingsScreen(
                     BasicComponent(title = "版本", summary = BuildConfig.VERSION_NAME)
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     BasicComponent(title = "作者", summary = "松川 & DeepSeek")
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    BasicComponent(
+                        title = "GitHub",
+                        summary = "Kastorice/MusicTagger",
+                        onClick = onOpenGithub,
+                        endActions = {
+                            Icon(
+                                imageVector = MiuixIcons.ChevronForward,
+                                contentDescription = null,
+                                tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    )
                 }
             }
         }

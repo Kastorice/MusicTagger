@@ -4,13 +4,13 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- queue_music glyph sized to the golden ratio of the 66dp adaptive-icon
-         safe circle (40.8dp = 61.8% of 66dp), centered. -->
+    <!-- queue_music glyph: three bars are vertically centered (golden-ratio
+         glyph width 61.8% of the 66dp safe circle). -->
     <group
         android:scaleX="2.267"
         android:scaleY="2.267"
         android:translateX="26.8"
-        android:translateY="24.55">
+        android:translateY="26.8">
         <path
             android:fillColor="#1F1F1F"
             android:pathData="M16,20q-1.25,0-2.13-0.88T13,17t0.88-2.13T16,14q0.28,0 0.53,0.04T17,14.2V6h5V8H19v9q0,1.25-0.88,2.13T16,20ZM3,16V14h8v2H3Zm0-4V10H15v2H3ZM3,8V6H15V8H3Z" />

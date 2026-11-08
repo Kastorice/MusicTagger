@@ -112,6 +112,38 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   「在线匹配」由文字按钮改为搜索图标按钮，并与左侧「已输入 N 个字符」在同一行垂直居中对齐。
 - 验证：曲库/编辑页重新截图；`:app:assembleDebug` 通过。
 
+### 第五轮反馈修复（2026-11-08）
+
+**Bug 修复**
+
+1. 修改封面后曲库不更新：`ArtworkRepository` 的缩略图缓存 key 只有 URI，保存后没有失效；
+   且列表行 `produceState` 以 URI 为 key，不会重新加载。
+   - `TrackRepository.save()` 成功后调用 `ArtworkRepository.invalidateThumbnail(uri)`，
+     并给 `TrackItem.modifiedAt` 打时间戳；`refreshItem()` 也会 bump，刷新/保存后列表 key 变化即重新解码。
+   - `LibraryViewModel.refresh()` 先清空缩略图缓存。
+   - 实测：QQ 音乐应用新封面 → 保存 → 返回曲库立即显示新封面（无需手动刷新）；
+     手动推送替换文件后点刷新也能更新（随后恢复测试素材）。
+2. 在线匹配输入框光标跳到最后一个字符前：原输入框直接绑定 ViewModel 中的字符串，回写导致
+   selection 复位。改为面板内本地草稿 `keywordDraft`，只在点「搜索」或切换数据源时提交；
+   实测输入 `123` 得到 `周杰伦 晴天123`，光标保持在末尾。
+3. 在线匹配抽屉底部按钮与小白条重叠：给面板内容加 `navigationBarsPadding()`；
+   实测「返回结果 / 应用到编辑内容」位于手势条上方。
+4. 字号/字重：重新校准 `CompactTextStyles`（标题 30 sp、正文 15、描述 13、footnote 11-12、
+   按钮 15），分组标题改为 13 sp 常规字重灰色；卡片标题 16 sp Medium；设置页与参考图更接近。
+
+**建议落实**
+
+- 删除在线匹配面板顶部的说明文案。
+- 编辑页「文件信息」扩展为：格式、时长、大小、比特率（MediaMetadataRetriever）、采样率、
+  声道（MediaExtractor）、MIME、文件名、SAF 路径（如「内部存储/Music/sunny.mp3」）。
+- 编辑页各分组标题移到白色卡片上方（专辑封面/歌曲信息/歌词/文件信息），与设置页一致。
+- 曲库搜索框右侧增加清除按钮（有输入时显示）。
+- 「保存到文件」FAB 常驻右下角、加大并增加阴影；无修改时 Toast/Snackbar「没有需要保存的修改」。
+- 「关于音签」按参考图排版：版本 / 作者两行 + GitHub 行（右侧 chevron，点击打开
+  `https://github.com/Kastorice/MusicTagger`）。
+- 应用图标 glyph 下移，使三条横杠在圆形安全区内视觉居中。
+- 验证：截图更新为 `docs/screenshots/01`–`13`；`:app:assembleDebug` 通过，154 个单测保持全绿。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/debug/app-debug.apk`（约 19.4 MB，debug 签名，minSdk 26 / targetSdk 36）
