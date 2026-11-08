@@ -44,6 +44,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.icon.extended.Play
 
 @Composable
 fun LibraryScreen(
@@ -53,6 +54,7 @@ fun LibraryScreen(
     onAddAllFiles: () -> Unit,
     onRefresh: () -> Unit,
     onOpen: (String) -> Unit,
+    onOpenWith: (TrackItem) -> Unit,
     onRemove: (String) -> Unit,
     thumbnail: suspend (String) -> Bitmap?,
     modifier: Modifier = Modifier,
@@ -119,6 +121,7 @@ fun LibraryScreen(
                             item = item,
                             thumbnail = thumbnail,
                             onClick = { onOpen(item.uri) },
+                            onOpenWith = { onOpenWith(item) },
                             onRemove = { onRemove(item.uri) },
                         )
                     }
@@ -133,6 +136,7 @@ private fun TrackRow(
     item: TrackItem,
     thumbnail: suspend (String) -> Bitmap?,
     onClick: () -> Unit,
+    onOpenWith: () -> Unit,
     onRemove: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -184,8 +188,20 @@ private fun TrackRow(
                 }
             }
             Box {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(MiuixIcons.More, contentDescription = "更多操作")
+                IconButton(
+                    onClick = onOpenWith,
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Icon(
+                        MiuixIcons.Play,
+                        contentDescription = "选择打开方式",
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
+            Box {
+                IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(40.dp)) {
+                    Icon(MiuixIcons.More, contentDescription = "更多操作", modifier = Modifier.size(22.dp))
                 }
                 MiuixOverflowMenu(
                     expanded = menuExpanded,

@@ -1,5 +1,7 @@
 package com.musictag.app.ui
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,16 +27,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.musictag.app.AppContainer
+import com.musictag.app.data.model.TrackItem
 import com.musictag.app.ui.components.MiuixOverflowMenu
 import com.musictag.app.ui.editor.EditorScreen
 import com.musictag.app.ui.editor.EditorViewModel
@@ -58,6 +63,7 @@ import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.Music
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import kotlinx.coroutines.launch
 
 /**
  * App shell in HyperOS style: large-title top bar for the library, bottom
@@ -88,6 +94,19 @@ fun MusicTagApp(
     var editorUri by rememberSaveable { mutableStateOf<String?>(null) }
     var topMenuExpanded by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val openWithTrack: (TrackItem) -> Unit = { item ->
+        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(Uri.parse(item.uri), item.mimeType ?: "audio/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            context.startActivity(Intent.createChooser(viewIntent, "选择打开方式"))
+        } catch (_: ActivityNotFoundException) {
+            scope.launch { snackbarHostState.showSnackbar("没有找到可以播放该音频的应用") }
+        }
+    }
 
     val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) libraryViewModel.addTracks(uris, openSingle = true)
@@ -221,6 +240,7 @@ fun MusicTagApp(
                             tab = 0
                             editorUri = uri
                         },
+                        onOpenWith = openWithTrack,
                         onRemove = libraryViewModel::remove,
                         thumbnail = { uri -> libraryViewModel.thumbnail(Uri.parse(uri)) },
                     )

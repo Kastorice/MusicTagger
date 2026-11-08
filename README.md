@@ -24,6 +24,8 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
 
 右上角「更多」菜单（白色圆角卡片 + 背景压暗，参照 KernelSU）：`docs/screenshots/10-menu.png`
 
+点击卡片上的播放图标调起系统「选择打开方式」：`docs/screenshots/11-open-with.png`
+
 ## 功能
 
 - **SAF 文件选择**：支持多选 `mp3 / flac / ogg / opus / m4a(mp4) / aac`，授予持久化访问权限，

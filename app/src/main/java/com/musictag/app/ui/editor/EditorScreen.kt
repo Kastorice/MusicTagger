@@ -63,6 +63,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Download
+import top.yukonga.miuix.kmp.icon.extended.Search
 
 /**
  * Full screen tag editor, MIUI/HyperOS style. The save action is a capsule
@@ -303,22 +304,31 @@ fun EditorScreen(
                                     onValueChange = { viewModel.updateField(EditorField.LYRICS, it) },
                                     label = "歌词内容",
                                     singleLine = false,
-                                    minLines = 7,
+                                    minLines = 8,
                                     maxLines = 16,
+                                    hideLabel = true,
                                 )
                                 Spacer(Modifier.height(6.dp))
-                                Row(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
                                     Text(
                                         text = "已输入 ${state.fields.lyrics.length} 个字符",
                                         style = MiuixTheme.textStyles.footnote1,
                                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                         modifier = Modifier.weight(1f),
                                     )
-                                    TextButton(
-                                        text = "在线匹配",
+                                    IconButton(
                                         onClick = viewModel::openSearch,
-                                        minHeight = 32.dp,
-                                    )
+                                        modifier = Modifier.size(36.dp),
+                                    ) {
+                                        Icon(
+                                            MiuixIcons.Search,
+                                            contentDescription = "在线匹配歌词",
+                                            modifier = Modifier.size(22.dp),
+                                        )
+                                    }
                                 }
                             }
                         }

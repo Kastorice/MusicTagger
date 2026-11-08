@@ -101,6 +101,17 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   仍可能按系统主题着色，属系统行为）。
 - 验证：模拟器逐项截图 `docs/screenshots/01`–`10`；`:app:assembleDebug` 通过。
 
+### 第四轮交互补充（2026-11-08）
+
+- 曲库卡片在「更多」左侧新增播放图标（`MiuixIcons.Play`，40 dp 触控区），点击通过
+  `ACTION_VIEW + FLAG_GRANT_READ_URI_PERMISSION` 调起系统「选择打开方式」选择器；
+  模拟器中已确认弹出 YouTube Music / 音签等候选，见 `docs/screenshots/11-open-with.png`。
+- 「更多」菜单加入展开/收起动画：`Animatable` 驱动 140 ms 内 alpha 0→1、scale 0.88→1，
+  变换原点在右上角；关闭时 120 ms 缩小淡出后再移除 Popup。
+- 歌词卡片：去掉「歌词内容」浮动标签（`MusicTagTextField(hideLabel = true)`）；
+  「在线匹配」由文字按钮改为搜索图标按钮，并与左侧「已输入 N 个字符」在同一行垂直居中对齐。
+- 验证：曲库/编辑页重新截图；`:app:assembleDebug` 通过。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/debug/app-debug.apk`（约 19.4 MB，debug 签名，minSdk 26 / targetSdk 36）

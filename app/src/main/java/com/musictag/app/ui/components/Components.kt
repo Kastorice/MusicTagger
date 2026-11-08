@@ -2,6 +2,8 @@ package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,15 +23,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -382,12 +389,13 @@ fun MusicTagTextField(
     maxLines: Int = if (singleLine) 1 else 6,
     enabled: Boolean = true,
     labelAsPlaceholder: Boolean = false,
+    hideLabel: Boolean = false,
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
-        label = label,
+        label = if (hideLabel) "" else label,
         useLabelAsPlaceholder = labelAsPlaceholder,
         singleLine = singleLine,
         minLines = minLines,
@@ -467,7 +475,18 @@ fun MiuixOverflowMenu(
     onDismissRequest: () -> Unit,
     items: List<Pair<String, () -> Unit>>,
 ) {
-    if (!expanded) return
+    var visible by remember { mutableStateOf(expanded) }
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            visible = true
+            progress.animateTo(1f, tween(durationMillis = 140))
+        } else {
+            progress.animateTo(0f, tween(durationMillis = 120))
+            visible = false
+        }
+    }
+    if (!visible) return
     val marginPx = with(LocalDensity.current) { 12.dp.roundToPx() }
     val positionProvider = remember(marginPx) {
         object : androidx.compose.ui.window.PopupPositionProvider {
@@ -491,7 +510,15 @@ fun MiuixOverflowMenu(
         properties = androidx.compose.ui.window.PopupProperties(focusable = true),
     ) {
         Surface(
-            modifier = Modifier.width(200.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .graphicsLayer {
+                    val p = progress.value
+                    alpha = p
+                    scaleX = 0.88f + 0.12f * p
+                    scaleY = 0.88f + 0.12f * p
+                    transformOrigin = TransformOrigin(1f, 0f)
+                },
             shape = RoundedCornerShape(16.dp),
             color = MiuixTheme.colorScheme.surface,
             shadowElevation = 8.dp,
