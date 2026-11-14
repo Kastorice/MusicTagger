@@ -275,11 +275,21 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - release APK 1,588,989 字节（约 1.5 MB）；API 36 模拟器验证间距与 Tab 动画，154 个单测通过。
 - 版本 `versionCode 9` / `versionName 1.2.6`。
 
+### 第十五轮 v1.2.7（2026-11-15）
+
+- 间距：`InfoRow` 垂直内边距改为 10dp，`DetailSection`/关于/在线数据源卡片内容统一
+  增加 6dp 上下内边距，使首末行距边框约 16dp、行间约 20dp；下拉菜单选项垂直内边距 14→10dp。
+- Tab 选中态：白色滑块圆角恢复 9dp（与 12dp 轨道内缩 3dp 后的内圆角一致），移除滑动收窄，
+  保留点击区 indication = null 以消除矩形按压高亮。
+- release APK 1,588,989 字节；API 36 模拟器验证设置/文件信息行距、下拉菜单与白块贴合效果，
+  154 个单测通过。
+- 版本 `versionCode 10` / `versionName 1.2.7`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.6.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.7.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

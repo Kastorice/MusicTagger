@@ -496,7 +496,7 @@ private fun DetailSection(
             insideMargin = PaddingValues(start = 16.dp, end = 16.dp, bottom = 5.dp),
         )
         Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
-            Column { content() }
+            Column(modifier = Modifier.padding(vertical = 6.dp)) { content() }
         }
     }
 }

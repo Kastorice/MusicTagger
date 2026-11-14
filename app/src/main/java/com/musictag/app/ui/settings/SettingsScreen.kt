@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.settings
+package com.musictag.app.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
@@ -79,39 +79,42 @@ fun SettingsScreen(
 
             item {
                 SettingsGroup(title = "在线数据源") {
-                    Box {
-                        BasicComponent(
-                            title = "默认搜索平台",
-                            summary = "用于歌词与封面的在线匹配（非官方接口）",
-                            onClick = { sourceMenuExpanded = true },
-                            endActions = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = settings.preferredSource.displayName,
-                                        style = MiuixTheme.textStyles.body2,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Icon(
-                                        imageVector = MiuixIcons.ChevronForward,
-                                        contentDescription = null,
-                                        tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                        modifier = Modifier.size(16.dp).rotate(90f),
-                                    )
-                                }
-                            },
-                        )
-                        MiuixOverflowMenu(
-                            expanded = sourceMenuExpanded,
-                            onDismissRequest = { sourceMenuExpanded = false },
-                            selectedLabel = settings.preferredSource.displayName,
-                            items = sources.map { source ->
-                                source.displayName to {
-                                    onSourceChange(source)
-                                    sourceMenuExpanded = false
-                                }
-                            },
-                        )
+                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                        Box {
+                            BasicComponent(
+                                title = "默认搜索平台",
+                                summary = "用于歌词与封面的在线匹配（非官方接口）",
+                                onClick = { sourceMenuExpanded = true },
+                                insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                endActions = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = settings.preferredSource.displayName,
+                                            style = MiuixTheme.textStyles.body2,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Icon(
+                                            imageVector = MiuixIcons.ChevronForward,
+                                            contentDescription = null,
+                                            tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                            modifier = Modifier.size(16.dp).rotate(90f),
+                                        )
+                                    }
+                                },
+                            )
+                            MiuixOverflowMenu(
+                                expanded = sourceMenuExpanded,
+                                onDismissRequest = { sourceMenuExpanded = false },
+                                selectedLabel = settings.preferredSource.displayName,
+                                items = sources.map { source ->
+                                    source.displayName to {
+                                        onSourceChange(source)
+                                        sourceMenuExpanded = false
+                                    }
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -142,30 +145,32 @@ fun SettingsScreen(
 
             item {
                 SettingsGroup(title = "关于音签") {
-                    BasicComponent(
-                        title = "版本",
-                        summary = BuildConfig.VERSION_NAME,
-                        
-                    )
-                    BasicComponent(
-                        title = "作者",
-                        summary = "松川 & DeepSeek",
-                        
-                    )
-                    BasicComponent(
-                        title = "GitHub",
-                        summary = "Kastorice/MusicTagger",
-                        onClick = onOpenGithub,
-                        
-                        endActions = {
-                            Icon(
-                                imageVector = MiuixIcons.ChevronForward,
-                                contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                        },
-                    )
+                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                        BasicComponent(
+                            title = "版本",
+                            summary = BuildConfig.VERSION_NAME,
+                            insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                        BasicComponent(
+                            title = "作者",
+                            summary = "松川 & DeepSeek",
+                            insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                        BasicComponent(
+                            title = "GitHub",
+                            summary = "Kastorice/MusicTagger",
+                            onClick = onOpenGithub,
+                            insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                            endActions = {
+                                Icon(
+                                    imageVector = MiuixIcons.ChevronForward,
+                                    contentDescription = null,
+                                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }

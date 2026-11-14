@@ -154,7 +154,7 @@ fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         title = label,
         summary = value,
-        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
     )
 }
 
@@ -252,7 +252,7 @@ fun MiuixSegmentedControl(
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val pillShape = RoundedCornerShape(percent = 50)
+    val pillShape = RoundedCornerShape(9.dp)
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -652,7 +652,7 @@ fun MiuixOverflowMenu(
                             onDismissRequest()
                             action()
                         },
-                        insideMargin = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                        insideMargin = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                         endActions = if (label == selectedLabel) {
                             {
                                 Icon(
