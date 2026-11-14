@@ -56,6 +56,14 @@ data class LoadedTrack(
     val sampleRateHz: Int? = null,
     val channels: Int? = null,
     val location: String? = null,
+    val lastModified: Long? = null,
+    val codecMime: String? = null,
+    val codecName: String? = null,
+    val bitDepth: Int? = null,
+    val artworkWidth: Int? = null,
+    val artworkHeight: Int? = null,
+    val artworkMime: String? = null,
+    val artworkBytes: Int? = null,
 ) {
     val uriObject: Uri get() = Uri.parse(uri)
 }

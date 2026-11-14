@@ -84,6 +84,8 @@ class TrackRepository(
             val document = TagEditor.read(cacheFile)
             val artwork = document.artwork ?: artworkRepository.readEmbeddedPicture(uri)?.let { Artwork.fromBytes(it) }
             val technical = readTechnicalInfo(uri)
+            val audioFormat = readAudioFormat(uri)
+            val artworkBounds = artwork?.bytes?.let(::decodeBounds)
             val loaded = LoadedTrack(
                 uri = uri.toString(),
                 cacheFile = cacheFile,
@@ -96,6 +98,14 @@ class TrackRepository(
                 sampleRateHz = technical.sampleRateHz,
                 channels = technical.channels,
                 location = locationOf(uri),
+                lastModified = info.lastModified,
+                codecMime = audioFormat.codecMime,
+                codecName = audioFormat.codecName,
+                bitDepth = audioFormat.bitDepth,
+                artworkWidth = artworkBounds?.first,
+                artworkHeight = artworkBounds?.second,
+                artworkMime = artwork?.mimeType,
+                artworkBytes = artwork?.bytes?.size,
             )
             OpenedTrack(track = loaded, document = document, artwork = artwork)
         } catch (e: Exception) {
@@ -279,6 +289,57 @@ class TrackRepository(
             null
         } finally {
             runCatching { extractor.release() }
+        }
+    }
+
+    private data class AudioFormatInfo(
+        val codecMime: String? = null,
+        val codecName: String? = null,
+        val bitDepth: Int? = null,
+    )
+
+    private fun readAudioFormat(uri: Uri): AudioFormatInfo {
+        val extractor = MediaExtractor()
+        return try {
+            if (uri.scheme == "content") {
+                extractor.setDataSource(context, uri, null)
+            } else {
+                extractor.setDataSource(uri.path ?: return AudioFormatInfo())
+            }
+            for (index in 0 until extractor.trackCount) {
+                val format = extractor.getTrackFormat(index)
+                val mime = format.getString(MediaFormat.KEY_MIME)
+                if (mime?.startsWith("audio/") == true) {
+                    val codecName = runCatching { format.getString(MediaFormat.KEY_CODECS_STRING) }.getOrNull()
+                    val bitDepth = runCatching {
+                        if (format.containsKey("bits-per-sample")) {
+                            format.getInteger("bits-per-sample")
+                        } else {
+                            null
+                        }
+                    }.getOrNull()
+                    return AudioFormatInfo(
+                        codecMime = mime,
+                        codecName = codecName,
+                        bitDepth = bitDepth,
+                    )
+                }
+            }
+            AudioFormatInfo()
+        } catch (_: Exception) {
+            AudioFormatInfo()
+        } finally {
+            runCatching { extractor.release() }
+        }
+    }
+
+    private fun decodeBounds(bytes: ByteArray): Pair<Int, Int>? {
+        val options = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+        return if (options.outWidth > 0 && options.outHeight > 0) {
+            options.outWidth to options.outHeight
+        } else {
+            null
         }
     }
 

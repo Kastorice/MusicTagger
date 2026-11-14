@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import java.io.File
@@ -22,6 +23,7 @@ class TrackFileStore(private val context: Context) {
         val displayName: String,
         val sizeBytes: Long?,
         val mimeType: String?,
+        val lastModified: Long? = null,
     )
 
     class WriteBackException(message: String, cause: Throwable? = null) : Exception(message, cause)
@@ -42,6 +44,7 @@ class TrackFileStore(private val context: Context) {
     fun queryInfo(uri: Uri): DocumentInfo {
         var displayName = uri.lastPathSegment?.substringAfterLast('/') ?: "audio"
         var size: Long? = null
+        var lastModified: Long? = null
         if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
             try {
                 resolver.query(
@@ -63,12 +66,27 @@ class TrackFileStore(private val context: Context) {
             } catch (_: Exception) {
                 // Keep the URI-derived name.
             }
+            try {
+                resolver.query(
+                    uri,
+                    arrayOf(DocumentsContract.Document.COLUMN_LAST_MODIFIED),
+                    null, null, null,
+                )?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val index = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+                        if (index >= 0 && !cursor.isNull(index)) lastModified = cursor.getLong(index)
+                    }
+                }
+            } catch (_: Exception) {
+                // Some providers do not expose last_modified.
+            }
         } else if (uri.scheme == "file") {
             uri.path?.let { path ->
                 val file = File(path)
                 if (file.exists()) {
                     displayName = file.name
                     size = file.length()
+                    lastModified = file.lastModified()
                 }
             }
         }
@@ -80,7 +98,12 @@ class TrackFileStore(private val context: Context) {
         } ?: MimeTypeMap.getSingleton()
             .getMimeTypeFromExtension(displayName.substringAfterLast('.', "").lowercase())
 
-        return DocumentInfo(displayName = displayName, sizeBytes = size, mimeType = mime)
+        return DocumentInfo(
+            displayName = displayName,
+            sizeBytes = size,
+            mimeType = mime,
+            lastModified = lastModified,
+        )
     }
 
     /** Copies a document into the private cache so the tag engine can rewrite it. */

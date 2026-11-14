@@ -218,11 +218,23 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - release APK 在 API 36 模拟器安装验证：Tab 切换、搜索 FAB、在线匹配面板正常。
 - 版本 `versionCode 4` / `versionName 1.2.1`。
 
+### 第十轮 v1.2.2（2026-11-15）
+
+- 分段控件移除白色滑块阴影，仍保留 220ms 滑块位移动画。
+- 歌曲信息 Tab 移除卡片内的大按钮，改为与歌词 Tab 相同的圆形搜索 FAB（白底黑图标、
+  shadow(14dp) + shadowElevation 12dp）；文件信息 Tab 不显示。
+- 文件信息新增：扩展名、时长毫秒、大小字节、位深（MediaExtractor its-per-sample）、
+  编码（KEY_CODECS_STRING / MIME）、封面尺寸（仅解析图片边界）、封面格式/大小、
+  歌词行数/字符数、已填标签字段数/字符数、最后修改时间（SAF last_modified）。
+- 未新增依赖，release APK 仍约 1.5 MB（1,572,045 字节）。
+- release APK 在 API 36 模拟器验证三个 Tab、搜索 FAB、文件信息字段正常；154 个单测通过。
+- 版本 `versionCode 5` / `versionName 1.2.2`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.1.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.2.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

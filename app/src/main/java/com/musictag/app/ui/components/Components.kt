@@ -1,4 +1,4 @@
-package com.musictag.app.ui.components
+﻿package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -238,7 +238,6 @@ fun MiuixSegmentedControl(
                     .offset(x = animatedOffset)
                     .width(itemWidth)
                     .height(34.dp)
-                    .shadow(elevation = 2.dp, shape = pillShape, clip = false)
                     .clip(pillShape)
                     .background(MiuixTheme.colorScheme.surface),
             )

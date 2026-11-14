@@ -1,4 +1,4 @@
-package com.musictag.app.ui.editor
+﻿package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -159,8 +159,8 @@ fun EditorScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    if (selectedTab == 1) {
-                        LyricsSearchFab(onClick = viewModel::openSearch)
+                    if (selectedTab != 2) {
+                        SearchFloatingActionButton(onClick = viewModel::openSearch)
                     }
                     MiuixExtendedFloatingActionButton(
                         text = if (state.saving) "保存中…" else "保存到文件",
@@ -232,31 +232,11 @@ fun EditorScreen(
                                         )
                                         Spacer(Modifier.height(5.dp))
                                         Text(
-                                            text = "点击专辑封面进行替换",
+                                            text = "点击封面替换 · 右下角搜索可在线匹配",
                                             style = MiuixTheme.textStyles.footnote1,
                                             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                         )
                                     }
-                                }
-                                Spacer(Modifier.height(12.dp))
-                                Button(
-                                    onClick = viewModel::openSearch,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    cornerRadius = 14.dp,
-                                    minHeight = 42.dp,
-                                    insideMargin = PaddingValues(horizontal = 16.dp, vertical = 9.dp),
-                                    colors = ButtonDefaults.buttonColors(),
-                                ) {
-                                    Icon(
-                                        MiuixIcons.Download,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        "在线匹配所有歌曲信息",
-                                        style = MiuixTheme.textStyles.button,
-                                    )
                                 }
                             }
                         }
@@ -347,14 +327,68 @@ fun EditorScreen(
                             else -> item(key = "fileinfo") {
                                 EditorTabCard {
                                     InfoRow("格式", track.formatName ?: "未知")
+                                    InfoRow("扩展名", track.displayName.substringAfterLast('.', "").uppercase().ifBlank { "未知" })
                                     InfoRow("时长", Formats.duration(track.durationMs))
+                                    InfoRow("时长（毫秒）", Formats.durationMillis(track.durationMs))
                                     InfoRow("大小", Formats.fileSize(track.sizeBytes))
+                                    InfoRow("大小（字节）", Formats.fileSizeExact(track.sizeBytes))
                                     InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
                                     InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
                                     InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
-                                    InfoRow("类型", track.mimeType ?: "未知")
+                                    InfoRow("位深", track.bitDepth?.let { "$it bit" } ?: "未知")
+                                    InfoRow("编码", track.codecName ?: track.codecMime ?: "未知")
+                                    InfoRow("MIME 类型", track.mimeType ?: "未知")
+                                    InfoRow("封面", if (state.artwork != null) "已嵌入" else "无")
+                                    InfoRow(
+                                        "封面尺寸",
+                                        if (track.artworkWidth != null && track.artworkHeight != null) {
+                                            "${track.artworkWidth} × ${track.artworkHeight}"
+                                        } else {
+                                            "未知"
+                                        },
+                                    )
+                                    InfoRow("封面格式", track.artworkMime ?: "未知")
+                                    InfoRow(
+                                        "封面大小",
+                                        track.artworkBytes?.let {
+                                            "${Formats.fileSize(it.toLong())}（${Formats.fileSizeExact(it.toLong())}）"
+                                        } ?: "未知",
+                                    )
+                                    InfoRow("歌词行数", "${state.fields.lyrics.lineSequence().count { it.isNotBlank() }} 行")
+                                    InfoRow("歌词字符数", "${state.fields.lyrics.length} 字符")
+                                    InfoRow(
+                                        "标签字段",
+                                        "${listOf(
+                                            state.fields.title,
+                                            state.fields.artist,
+                                            state.fields.album,
+                                            state.fields.albumArtist,
+                                            state.fields.year,
+                                            state.fields.trackNumber,
+                                            state.fields.discNumber,
+                                            state.fields.genre,
+                                            state.fields.comment,
+                                        ).count { it.isNotBlank() }} / 9",
+                                    )
+                                    InfoRow(
+                                        "标签字符数",
+                                        "${
+                                            listOf(
+                                                state.fields.title,
+                                                state.fields.artist,
+                                                state.fields.album,
+                                                state.fields.albumArtist,
+                                                state.fields.year,
+                                                state.fields.trackNumber,
+                                                state.fields.discNumber,
+                                                state.fields.genre,
+                                                state.fields.comment,
+                                            ).sumOf { it.length }
+                                        } 字符",
+                                    )
                                     InfoRow("文件名", track.displayName)
                                     InfoRow("文件位置", track.location ?: "未知")
+                                    InfoRow("最后修改", Formats.dateTime(track.lastModified))
                                 }
                             }
                         }
@@ -470,9 +504,9 @@ private fun EditorTabCard(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
-/** Circular search FAB shown next to the save FAB while the lyrics tab is active. */
+/** Circular search FAB shown next to the save FAB while the tags/lyrics tab is active. */
 @Composable
-private fun LyricsSearchFab(onClick: () -> Unit) {
+private fun SearchFloatingActionButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .size(52.dp)

@@ -29,7 +29,7 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
 
 点击卡片上的播放图标调起系统「选择打开方式」：`docs/screenshots/11-open-with.png`
 
-编辑页文件信息（格式/时长/大小/比特率/采样率/声道/类型/路径）：`docs/screenshots/12-file-info.png`
+编辑页文件信息（格式/时长/大小/比特率/采样率/声道/位深/编码/封面/歌词统计/路径/修改时间）：`docs/screenshots/12-file-info.png`；统计明细：`docs/screenshots/16-file-info-detail.png`
 
 关于音签与 GitHub 链接：`docs/screenshots/13-about.png`
 
@@ -65,7 +65,7 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
   每次只组合当前 Tab，减少长列表与大量输入框带来的滑动掉帧。歌词 Tab 使用等宽字体、自动增高的
   输入框，并对 `[...]` 时间轴/元数据着色；切到歌词 Tab 时保存 FAB 左侧出现圆形搜索 FAB。
 - **曲库与文件信息**：卡片上的播放按钮可直接调起系统「选择打开方式」；搜索框有清除按钮；
-  编辑页展示格式、时长、大小、比特率、采样率、声道、MIME、文件名与 SAF 路径；「关于」中提供
+  编辑页展示格式/扩展名/时长/大小/比特率/采样率/声道/位深/编码/封面参数/歌词统计/文件名/SAF 路径/最后修改等；「关于」中提供
   项目 GitHub 链接。
 
 ## 技术栈
@@ -122,7 +122,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.2.1.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.2.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 
