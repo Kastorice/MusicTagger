@@ -57,7 +57,7 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
   「另存为副本」。封面会自动缩放/重新编码，避免把几 MB 的原图塞进音频文件。
 - **MIUI 设计**：参考 HyperOS / LSPosed / KernelSU / InstallerX-Revived 的紧凑排版（更小字号、
   大标题 + 版本号、分组标题与卡片内文左对齐）、胶囊搜索框、底部导航、胶囊 FAB、右上角锚定的
-  白色圆角菜单卡片、分组卡片、浮动标签输入框、蓝色填充分段控件、MIUI 开关 / 复选框 / 底部面板 /
+  白色圆角菜单卡片、分组卡片、浮动标签输入框、中性分段控件（白色滑块 + 滑动动画）、MIUI 开关 / 复选框 / 底部面板 /
   对话框；保存动作是右下角常驻的胶囊扩展 FAB（无修改时提示「没有需要保存的修改」）；点击封面
   可选择在线匹配 / 本地图片 / 移除；可选 Material You 动态取色；深色模式跟随系统；应用图标为
   白底 queue_music 线性图标。
@@ -122,7 +122,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.2.0.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.1.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 

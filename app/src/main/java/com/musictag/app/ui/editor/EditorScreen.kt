@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.editor
+package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -475,17 +476,19 @@ private fun LyricsSearchFab(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .size(52.dp)
+            .shadow(elevation = 14.dp, shape = CircleShape, clip = false)
             .clip(CircleShape)
             .clickable(onClick = onClick),
         shape = CircleShape,
-        color = MiuixTheme.colorScheme.secondaryContainer,
-        contentColor = MiuixTheme.colorScheme.onSecondaryContainer,
-        shadowElevation = 10.dp,
+        color = MiuixTheme.colorScheme.surface,
+        contentColor = MiuixTheme.colorScheme.onSurface,
+        shadowElevation = 12.dp,
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = MiuixIcons.Search,
                 contentDescription = "在线匹配歌词",
+                tint = MiuixTheme.colorScheme.onSurface,
                 modifier = Modifier.size(22.dp),
             )
         }

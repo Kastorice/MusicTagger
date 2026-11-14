@@ -3,6 +3,8 @@ package com.musictag.app.ui.components
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -205,8 +209,9 @@ fun MiuixExtendedFloatingActionButton(
 }
 
 /**
- * Fully rounded MIUI segmented control. The selected segment is filled with the
- * primary color so it stands out clearly from the light gray track.
+ * Neutral MIUI segmented control: gray track with an animated white pill for the
+ * selected segment. No accent color is used, keeping the page's blue reserved
+ * for the actual primary actions.
  */
 @Composable
 fun MiuixSegmentedControl(
@@ -215,33 +220,49 @@ fun MiuixSegmentedControl(
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val pillShape = RoundedCornerShape(9.dp)
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         color = MiuixTheme.colorScheme.secondaryContainer,
     ) {
-        Row(modifier = Modifier.padding(3.dp)) {
-            options.forEachIndexed { index, label ->
-                val selected = index == selectedIndex
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(if (selected) MiuixTheme.colorScheme.primary else Color.Transparent)
-                        .clickable { onSelected(index) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = label,
-                        style = MiuixTheme.textStyles.button,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                        color = if (selected) {
-                            MiuixTheme.colorScheme.onPrimary
-                        } else {
-                            MiuixTheme.colorScheme.onSurfaceVariantSummary
-                        },
-                    )
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(3.dp)) {
+            val itemWidth = maxWidth / options.size
+            val animatedOffset by animateDpAsState(
+                targetValue = itemWidth * selectedIndex.coerceIn(0, options.lastIndex),
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                label = "segmentOffset",
+            )
+            Box(
+                modifier = Modifier
+                    .offset(x = animatedOffset)
+                    .width(itemWidth)
+                    .height(34.dp)
+                    .shadow(elevation = 2.dp, shape = pillShape, clip = false)
+                    .clip(pillShape)
+                    .background(MiuixTheme.colorScheme.surface),
+            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                options.forEachIndexed { index, label ->
+                    val selected = index == selectedIndex
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(34.dp)
+                            .clickable { onSelected(index) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label,
+                            style = MiuixTheme.textStyles.button,
+                            fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+                            color = if (selected) {
+                                MiuixTheme.colorScheme.onSurface
+                            } else {
+                                MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            },
+                        )
+                    }
                 }
             }
         }

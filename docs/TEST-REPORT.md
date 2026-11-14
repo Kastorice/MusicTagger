@@ -1,4 +1,4 @@
-# 验证报告 · 音签 MusicTagger（MIUI / HyperOS 版）
+﻿# 验证报告 · 音签 MusicTagger（MIUI / HyperOS 版）
 
 日期：2026-11-07 · 环境：Windows 10.0.26300、JDK 21.0（`D:\Java\jdk-21`）、
 Android SDK API 36 + Platform 37、Gradle 8.14.3、AGP 8.13.0、Kotlin 2.3.20、Compose 1.10.3、
@@ -209,11 +209,20 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   搜索 FAB 位于保存 FAB 左侧（desc=在线匹配歌词，bounds 522–580/2206–2264），无崩溃。
 - 版本 `versionCode 3` / `versionName 1.2.0`。
 
+### 第九轮 v1.2.1（2026-11-14）
+
+- 分段控件彻底去除强调色：灰色轨道 + 白色选中滑块，滑块用 `animateDpAsState` 做 220ms 位移，
+  选中文字为 onSurface，未选中为 onSurfaceVariantSummary；设置页与在线匹配面板同步生效。
+- 歌词 Tab 搜索 FAB 改为白底黑色搜索图标（`surface` / `onSurface`），
+  叠加 `shadow(14dp)` 与 `Surface(shadowElevation = 12dp)`，与保存 FAB 阴影一致。
+- release APK 在 API 36 模拟器安装验证：Tab 切换、搜索 FAB、在线匹配面板正常。
+- 版本 `versionCode 4` / `versionName 1.2.1`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.0.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.1.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 
