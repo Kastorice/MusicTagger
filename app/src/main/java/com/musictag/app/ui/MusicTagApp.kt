@@ -1,6 +1,7 @@
 package com.musictag.app.ui
 
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.musictag.app.AppContainer
+import com.musictag.app.MainActivity
 import com.musictag.app.data.model.TrackItem
 import com.musictag.app.ui.components.MiuixOverflowMenu
 import com.musictag.app.ui.editor.EditorScreen
@@ -102,7 +104,14 @@ fun MusicTagApp(
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         try {
-            context.startActivity(Intent.createChooser(viewIntent, "选择打开方式"))
+            val chooser = Intent.createChooser(viewIntent, "选择打开方式").apply {
+                // Never offer 音签 itself: ACTION_VIEW would just reopen this editor.
+                putExtra(
+                    Intent.EXTRA_EXCLUDE_COMPONENTS,
+                    arrayOf(ComponentName(context, MainActivity::class.java)),
+                )
+            }
+            context.startActivity(chooser)
         } catch (_: ActivityNotFoundException) {
             scope.launch { snackbarHostState.showSnackbar("没有找到可以播放该音频的应用") }
         }

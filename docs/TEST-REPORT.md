@@ -230,11 +230,22 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - release APK 在 API 36 模拟器验证三个 Tab、搜索 FAB、文件信息字段正常；154 个单测通过。
 - 版本 `versionCode 5` / `versionName 1.2.2`。
 
+### 第十一轮 v1.2.3（2026-11-15）
+
+- 打开在线匹配面板即自动搜索：`EditorViewModel.openSearch()` 在显示面板后若关键词非空直接调用
+  `search()`；模拟器验证打开 FAB 后无需再点「搜索」即可看到结果。
+- 文件信息重新分组（音频参数 / 文件 / 封面与歌词），删除扩展名、毫秒、精确字节、MIME、
+  标签字段统计等低价值项，保留 16 项有用数据，界面更清爽。
+- 修复播放按钮误入编辑页：`ACTION_VIEW` 的 chooser 通过 `EXTRA_EXCLUDE_COMPONENTS`
+  排除 `MainActivity`，不会再列出「音签」；模拟器点击播放直接打开 YouTube Music。
+- release APK 仍为 1,572,049 字节（约 1.5 MB）；154 个单测通过。
+- 版本 `versionCode 6` / `versionName 1.2.3`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.2.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.3.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

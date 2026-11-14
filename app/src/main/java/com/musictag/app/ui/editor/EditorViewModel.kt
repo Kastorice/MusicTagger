@@ -237,6 +237,11 @@ class EditorViewModel(private val container: AppContainer) : ViewModel() {
                 ),
             )
         }
+        // Opening the match sheet starts a search immediately with the prefilled
+        // keyword, so the user does not have to tap the search button.
+        if (_state.value.search.keyword.isNotBlank()) {
+            search()
+        }
     }
 
     fun closeSearch() {

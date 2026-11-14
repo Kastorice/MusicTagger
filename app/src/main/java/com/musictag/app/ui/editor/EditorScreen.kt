@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.editor
+package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -325,70 +325,44 @@ fun EditorScreen(
                             }
 
                             else -> item(key = "fileinfo") {
-                                EditorTabCard {
-                                    InfoRow("格式", track.formatName ?: "未知")
-                                    InfoRow("扩展名", track.displayName.substringAfterLast('.', "").uppercase().ifBlank { "未知" })
-                                    InfoRow("时长", Formats.duration(track.durationMs))
-                                    InfoRow("时长（毫秒）", Formats.durationMillis(track.durationMs))
-                                    InfoRow("大小", Formats.fileSize(track.sizeBytes))
-                                    InfoRow("大小（字节）", Formats.fileSizeExact(track.sizeBytes))
-                                    InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
-                                    InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
-                                    InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
-                                    InfoRow("位深", track.bitDepth?.let { "$it bit" } ?: "未知")
-                                    InfoRow("编码", track.codecName ?: track.codecMime ?: "未知")
-                                    InfoRow("MIME 类型", track.mimeType ?: "未知")
-                                    InfoRow("封面", if (state.artwork != null) "已嵌入" else "无")
-                                    InfoRow(
-                                        "封面尺寸",
-                                        if (track.artworkWidth != null && track.artworkHeight != null) {
-                                            "${track.artworkWidth} × ${track.artworkHeight}"
-                                        } else {
-                                            "未知"
-                                        },
-                                    )
-                                    InfoRow("封面格式", track.artworkMime ?: "未知")
-                                    InfoRow(
-                                        "封面大小",
-                                        track.artworkBytes?.let {
-                                            "${Formats.fileSize(it.toLong())}（${Formats.fileSizeExact(it.toLong())}）"
-                                        } ?: "未知",
-                                    )
-                                    InfoRow("歌词行数", "${state.fields.lyrics.lineSequence().count { it.isNotBlank() }} 行")
-                                    InfoRow("歌词字符数", "${state.fields.lyrics.length} 字符")
-                                    InfoRow(
-                                        "标签字段",
-                                        "${listOf(
-                                            state.fields.title,
-                                            state.fields.artist,
-                                            state.fields.album,
-                                            state.fields.albumArtist,
-                                            state.fields.year,
-                                            state.fields.trackNumber,
-                                            state.fields.discNumber,
-                                            state.fields.genre,
-                                            state.fields.comment,
-                                        ).count { it.isNotBlank() }} / 9",
-                                    )
-                                    InfoRow(
-                                        "标签字符数",
-                                        "${
-                                            listOf(
-                                                state.fields.title,
-                                                state.fields.artist,
-                                                state.fields.album,
-                                                state.fields.albumArtist,
-                                                state.fields.year,
-                                                state.fields.trackNumber,
-                                                state.fields.discNumber,
-                                                state.fields.genre,
-                                                state.fields.comment,
-                                            ).sumOf { it.length }
-                                        } 字符",
-                                    )
-                                    InfoRow("文件名", track.displayName)
-                                    InfoRow("文件位置", track.location ?: "未知")
-                                    InfoRow("最后修改", Formats.dateTime(track.lastModified))
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    EditorSection(title = "音频参数") {
+                                        InfoRow("格式", track.formatName ?: "未知")
+                                        InfoRow("时长", Formats.duration(track.durationMs))
+                                        InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
+                                        InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
+                                        InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
+                                        InfoRow("位深", track.bitDepth?.let { "$it bit" } ?: "未知")
+                                        InfoRow("编码", track.codecName ?: track.codecMime ?: "未知")
+                                    }
+                                    EditorSection(title = "文件") {
+                                        InfoRow("大小", Formats.fileSize(track.sizeBytes))
+                                        InfoRow("文件名", track.displayName)
+                                        InfoRow("文件位置", track.location ?: "未知")
+                                        InfoRow("最后修改", Formats.dateTime(track.lastModified))
+                                    }
+                                    EditorSection(title = "封面与歌词") {
+                                        InfoRow("封面", if (state.artwork != null) "已嵌入" else "无")
+                                        InfoRow(
+                                            "封面尺寸",
+                                            if (track.artworkWidth != null && track.artworkHeight != null) {
+                                                "${track.artworkWidth} × ${track.artworkHeight}"
+                                            } else {
+                                                "未知"
+                                            },
+                                        )
+                                        InfoRow("封面格式", track.artworkMime ?: "未知")
+                                        InfoRow(
+                                            "封面大小",
+                                            track.artworkBytes?.let {
+                                                "${Formats.fileSize(it.toLong())}（${Formats.fileSizeExact(it.toLong())}）"
+                                            } ?: "未知",
+                                        )
+                                        InfoRow("歌词行数", "${state.fields.lyrics.lineSequence().count { it.isNotBlank() }} 行")
+                                    }
                                 }
                             }
                         }

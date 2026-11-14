@@ -122,7 +122,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.2.2.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.3.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 
