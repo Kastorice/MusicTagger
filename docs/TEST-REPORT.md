@@ -241,11 +241,21 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - release APK 仍为 1,572,049 字节（约 1.5 MB）；154 个单测通过。
 - 版本 `versionCode 6` / `versionName 1.2.3`。
 
+### 第十二轮 v1.2.4（2026-11-15）
+
+- 保存 FAB 改为可伸缩：`rememberLazyListState` + `derivedStateOf` 判断是否在顶部；
+  顶部展开文案，滚动后收缩为圆形；`animateContentSize` 与 `AnimatedVisibility`
+  做 expand/shrinkHorizontally + fade 动画；保存图标改为自绘软盘矢量。
+- 分段控件滑块改为 spring(dampingRatio=0.82, stiffness=420) 弹性滑动，文字颜色 180ms 过渡。
+- 切换 Tab 时列表平滑回到顶部（`animateScrollToItem(0)`），FAB 同步展开。
+- release APK 1,588,990 字节（约 1.5 MB）；154 个单测通过。
+- 版本 `versionCode 7` / `versionName 1.2.4`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.3.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.4.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

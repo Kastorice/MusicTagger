@@ -2,10 +2,18 @@
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -169,14 +177,14 @@ fun MiuixPrimaryButton(
     }
 }
 
-/** MIUI capsule extended floating action button (icon + label). */
+/** MIUI capsule floating action button: expands to show the label, collapses to a circle. */
 @Composable
-fun MiuixExtendedFloatingActionButton(
+fun MiuixSaveFloatingActionButton(
+    expanded: Boolean,
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
     val container = if (enabled) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.disabledPrimaryButton
     val content = if (enabled) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.disabledOnPrimaryButton
@@ -191,19 +199,42 @@ fun MiuixExtendedFloatingActionButton(
         shadowElevation = 12.dp,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier = Modifier
+                .height(52.dp)
+                .animateContentSize(
+                    animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (icon != null) {
-                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(22.dp))
-                Spacer(Modifier.width(9.dp))
+            Box(modifier = Modifier.size(52.dp), contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_save_floppy),
+                    contentDescription = "保存到文件",
+                    tint = content,
+                    modifier = Modifier.size(22.dp),
+                )
             }
-            Text(
-                text = text,
-                style = MiuixTheme.textStyles.button,
-                fontWeight = FontWeight.Medium,
-                color = content,
-            )
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn(tween(durationMillis = 140, delayMillis = 40)) +
+                    expandHorizontally(
+                        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                        expandFrom = Alignment.Start,
+                    ),
+                exit = fadeOut(tween(durationMillis = 90)) +
+                    shrinkHorizontally(
+                        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                        shrinkTowards = Alignment.Start,
+                    ),
+            ) {
+                Text(
+                    text = text,
+                    style = MiuixTheme.textStyles.button,
+                    fontWeight = FontWeight.Medium,
+                    color = content,
+                    modifier = Modifier.padding(end = 22.dp),
+                )
+            }
         }
     }
 }
@@ -230,7 +261,7 @@ fun MiuixSegmentedControl(
             val itemWidth = maxWidth / options.size
             val animatedOffset by animateDpAsState(
                 targetValue = itemWidth * selectedIndex.coerceIn(0, options.lastIndex),
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
                 label = "segmentOffset",
             )
             Box(
@@ -244,6 +275,15 @@ fun MiuixSegmentedControl(
             Row(modifier = Modifier.fillMaxWidth()) {
                 options.forEachIndexed { index, label ->
                     val selected = index == selectedIndex
+                    val contentColor by animateColorAsState(
+                        targetValue = if (selected) {
+                            MiuixTheme.colorScheme.onSurface
+                        } else {
+                            MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        },
+                        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                        label = "segmentColor",
+                    )
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -255,11 +295,7 @@ fun MiuixSegmentedControl(
                             text = label,
                             style = MiuixTheme.textStyles.button,
                             fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
-                            color = if (selected) {
-                                MiuixTheme.colorScheme.onSurface
-                            } else {
-                                MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            },
+                            color = contentColor,
                         )
                     }
                 }

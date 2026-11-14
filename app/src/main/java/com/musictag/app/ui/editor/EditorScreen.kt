@@ -1,4 +1,4 @@
-package com.musictag.app.ui.editor
+﻿package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +48,7 @@ import com.musictag.app.ui.components.ErrorState
 import com.musictag.app.ui.components.InfoRow
 import com.musictag.app.ui.components.LoadingState
 import com.musictag.app.ui.components.LyricsTextField
-import com.musictag.app.ui.components.MiuixExtendedFloatingActionButton
+import com.musictag.app.ui.components.MiuixSaveFloatingActionButton
 import com.musictag.app.ui.components.MiuixSegmentedControl
 import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.util.Formats
@@ -94,6 +96,12 @@ fun EditorScreen(
     var showCoverDialog by remember { mutableStateOf(false) }
     var pendingSaveAsName by remember { mutableStateOf<String?>(null) }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    val listState = rememberLazyListState()
+    val saveExpanded by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 12
+        }
+    }
 
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
         if (picked != null) viewModel.setArtworkFromLocal(picked)
@@ -126,6 +134,12 @@ fun EditorScreen(
             pendingSaveAsName = null
             createDocument.launch(name)
         }
+    }
+
+    // A tab switch returns to the top so the extended save FAB is expanded and
+    // the new tab starts from its first field.
+    LaunchedEffect(selectedTab) {
+        listState.animateScrollToItem(0)
     }
 
     val requestClose: () -> Unit = {
@@ -162,7 +176,8 @@ fun EditorScreen(
                     if (selectedTab != 2) {
                         SearchFloatingActionButton(onClick = viewModel::openSearch)
                     }
-                    MiuixExtendedFloatingActionButton(
+                    MiuixSaveFloatingActionButton(
+                        expanded = saveExpanded,
                         text = if (state.saving) "保存中…" else "保存到文件",
                         onClick = {
                             if (state.hasChanges) {
@@ -172,7 +187,6 @@ fun EditorScreen(
                             }
                         },
                         enabled = !state.saving,
-                        icon = MiuixIcons.Download,
                     )
                 }
             }
@@ -192,6 +206,7 @@ fun EditorScreen(
                 else -> {
                     val track = state.track!!
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize().padding(padding),
                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 120.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
