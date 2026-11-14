@@ -1,4 +1,4 @@
-package com.musictag.app.ui.settings
+﻿package com.musictag.app.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
@@ -145,18 +145,18 @@ fun SettingsScreen(
                     BasicComponent(
                         title = "版本",
                         summary = BuildConfig.VERSION_NAME,
-                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                        
                     )
                     BasicComponent(
                         title = "作者",
                         summary = "松川 & DeepSeek",
-                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                        
                     )
                     BasicComponent(
                         title = "GitHub",
                         summary = "Kastorice/MusicTagger",
                         onClick = onOpenGithub,
-                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                        
                         endActions = {
                             Icon(
                                 imageVector = MiuixIcons.ChevronForward,

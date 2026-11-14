@@ -154,7 +154,7 @@ fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         title = label,
         summary = value,
-        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
     )
 }
 
@@ -252,7 +252,7 @@ fun MiuixSegmentedControl(
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val pillShape = RoundedCornerShape(9.dp)
+    val pillShape = RoundedCornerShape(percent = 50)
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -260,19 +260,30 @@ fun MiuixSegmentedControl(
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(3.dp)) {
             val itemWidth = maxWidth / options.size
-            val animatedOffset by animateDpAsState(
-                targetValue = itemWidth * selectedIndex.coerceIn(0, options.lastIndex),
-                animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
-                label = "segmentOffset",
+            val indicator = remember { Animatable(selectedIndex.toFloat()) }
+            LaunchedEffect(selectedIndex) {
+                indicator.animateTo(
+                    targetValue = selectedIndex.coerceIn(0, options.lastIndex).toFloat(),
+                    animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
+                )
+            }
+            // While gliding, the indicator shrinks into a small capsule, so its
+            // edge never cuts across the neighbouring segment boundaries.
+            val pillWidth by animateDpAsState(
+                targetValue = if (indicator.isRunning) itemWidth * 0.8f else itemWidth,
+                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                label = "segmentWidth",
             )
+            val animatedOffset = itemWidth * indicator.value + (itemWidth - pillWidth) / 2
             Box(
                 modifier = Modifier
                     .offset(x = animatedOffset)
-                    .width(itemWidth)
+                    .width(pillWidth)
                     .height(34.dp)
                     .clip(pillShape)
                     .background(MiuixTheme.colorScheme.surface),
             )
+            val tabInteraction = remember { MutableInteractionSource() }
             Row(modifier = Modifier.fillMaxWidth()) {
                 options.forEachIndexed { index, label ->
                     val selected = index == selectedIndex
@@ -289,7 +300,10 @@ fun MiuixSegmentedControl(
                         modifier = Modifier
                             .weight(1f)
                             .height(34.dp)
-                            .clickable { onSelected(index) },
+                            .clickable(
+                                interactionSource = tabInteraction,
+                                indication = null,
+                            ) { onSelected(index) },
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
