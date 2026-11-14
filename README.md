@@ -55,12 +55,14 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
     moov 尺寸变化时修正 `stco/co64` 偏移，兼容 faststart。
 - **安全写入**：先写同目录临时文件、fsync、`ATOMIC_MOVE` 原子替换；源文件不可写时自动提示
   「另存为副本」。封面会自动缩放/重新编码，避免把几 MB 的原图塞进音频文件。
-- **MIUI 设计**：参考 HyperOS / LSPosed 设置页的紧凑排版（更小字号、大标题 + 版本号、
-  分组标题与卡片内文左对齐）、胶囊搜索框、底部导航、胶囊 FAB、右上角锚定的白色圆角菜单卡片、
-  分组卡片、浮动标签输入框、蓝色填充分段控件、MIUI 开关 / 复选框 / 底部面板 / 对话框；
-  保存动作是右下角常驻的胶囊扩展 FAB（无修改时提示「没有需要保存的修改」）；点击封面可选择
-  在线匹配 / 本地图片 / 移除；可选 Material You 动态取色；深色模式跟随系统；应用图标为白底
-  queue_music 线性图标。
+- **MIUI 设计**：参考 HyperOS / LSPosed / KernelSU / InstallerX-Revived 的紧凑排版（更小字号、
+  大标题 + 版本号、分组标题与卡片内文左对齐）、胶囊搜索框、底部导航、胶囊 FAB、右上角锚定的
+  白色圆角菜单卡片、分组卡片、浮动标签输入框、蓝色填充分段控件、MIUI 开关 / 复选框 / 底部面板 /
+  对话框；保存动作是右下角常驻的胶囊扩展 FAB（无修改时提示「没有需要保存的修改」）；点击封面
+  可选择在线匹配 / 本地图片 / 移除；可选 Material You 动态取色；深色模式跟随系统；应用图标为
+  白底 queue_music 线性图标。
+- **编辑页 Tabs**：专辑封面卡片下方用与设置页一致的分段控件切换「歌曲信息 / 歌词 / 文件信息」，
+  每次只组合当前 Tab，减少长列表与大量输入框带来的滑动掉帧。
 - **曲库与文件信息**：卡片上的播放按钮可直接调起系统「选择打开方式」；搜索框有清除按钮；
   编辑页展示格式、时长、大小、比特率、采样率、声道、MIME、文件名与 SAF 路径；「关于」中提供
   项目 GitHub 链接。
@@ -108,14 +110,18 @@ Gradle 8.14.3。项目路径包含中文，`tools/build.ps1` 会自动用 `subst
 ```powershell
 # 调试 APK
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":app:assembleDebug"
+# 发布 APK（R8 + 资源压缩，约 1.5 MB）
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":app:assembleRelease"
 # 全部单元测试
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":core:test"
 # 全部验证（构建 + 测试）
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":core:test",":app:assembleDebug"
 ```
 
-APK 输出：`app/build/outputs/apk/debug/app-debug.apk`（交付副本：`dist/MusicTagger-v1.0.0-debug.apk`，
-SHA-256 见 `dist/SHA256.txt`）。
+APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
+`app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
+中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
+交付副本：`dist/MusicTagger-v1.1.0.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 
@@ -136,6 +142,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\e2e\prepare-media.ps1
 
 - 网易云/QQ 音乐接口均为非官方公开接口，可能随服务端调整失效；不提供登录、下载音频、
   评论等能力，只读取搜索结果、歌词和专辑封面。可配置自建 NeteaseCloudMusicApi 作为回退。
+- Spotify 源暂未接入：其官方 Web API 必须 OAuth（需开发者 Client ID/Secret）且不提供歌词接口；
+  匿名 web-player token 接口经测试被 403 拒绝，因此保留网易云 / QQ 两个数据源。
 - 封面写入为「单一前置封面」策略；`OGG` 中其它图片类型会被替换。
 - 极少数特殊容器（分片 MP4 `moof`、链式/复用 OGG 流）不支持写入，会给出中文错误提示，
   不会破坏原文件。

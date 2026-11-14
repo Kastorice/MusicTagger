@@ -24,10 +24,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,13 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.musictag.app.R
 import com.musictag.app.data.model.TrackItem
 import com.musictag.app.ui.components.ArtworkCard
 import com.musictag.app.ui.components.ErrorState
 import com.musictag.app.ui.components.InfoRow
 import com.musictag.app.ui.components.LoadingState
 import com.musictag.app.ui.components.MiuixExtendedFloatingActionButton
+import com.musictag.app.ui.components.MiuixSegmentedControl
 import com.musictag.app.ui.components.MusicTagTextField
 import com.musictag.app.util.Formats
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -69,9 +71,9 @@ import top.yukonga.miuix.kmp.icon.extended.Search
 import kotlinx.coroutines.launch
 
 /**
- * Full screen tag editor, MIUI/HyperOS style. The save action is a capsule
- * extended FAB in the bottom-right corner; the cover card opens a chooser
- * dialog for online/local artwork.
+ * Full screen tag editor, MIUI/HyperOS style. The cover card stays pinned above
+ * a segmented tab switch (歌曲信息 / 歌词 / 文件信息); only the selected tab is
+ * composed, which keeps the heavy text fields out of unrelated scroll frames.
  */
 @Composable
 fun EditorScreen(
@@ -87,6 +89,7 @@ fun EditorScreen(
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showCoverDialog by remember { mutableStateOf(false) }
     var pendingSaveAsName by remember { mutableStateOf<String?>(null) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
         if (picked != null) viewModel.setArtworkFromLocal(picked)
@@ -127,7 +130,7 @@ fun EditorScreen(
     BackHandler(enabled = true) { requestClose() }
 
     val artworkBitmap by produceState<Bitmap?>(initialValue = null, key1 = state.artwork) {
-        value = state.artwork?.let { viewModel.previewBitmap(it.bytes, 640) }
+        value = state.artwork?.let { viewModel.previewBitmap(it.bytes, 512) }
     }
 
     Scaffold(
@@ -136,11 +139,11 @@ fun EditorScreen(
             SmallTopAppBar(
                 title = "编辑标签",
                 navigationIcon = {
-                    IconButton(onClick = requestClose, modifier = Modifier.size(52.dp)) {
+                    IconButton(onClick = requestClose, modifier = Modifier.size(50.dp)) {
                         Icon(
                             MiuixIcons.Back,
                             contentDescription = "返回",
-                            modifier = Modifier.size(25.dp),
+                            modifier = Modifier.size(24.dp),
                         )
                     }
                 },
@@ -178,180 +181,190 @@ fun EditorScreen(
                     val track = state.track!!
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(padding),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 120.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         item(key = "artwork") {
                             EditorSection(title = "专辑封面") {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(16.dp))
-                                                .clickable { showCoverDialog = true },
-                                        ) {
-                                            ArtworkCard(
-                                                bitmap = artworkBitmap,
-                                                modifier = Modifier.size(92.dp),
-                                                corner = 16.dp,
-                                            )
-                                        }
-                                        Spacer(Modifier.width(14.dp))
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = state.fields.title.ifBlank {
-                                                    track.displayName.substringBeforeLast('.')
-                                                },
-                                                style = MiuixTheme.textStyles.title3,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
-                                            Spacer(Modifier.height(4.dp))
-                                            Text(
-                                                text = state.fields.artist.ifBlank { "未知歌手" } +
-                                                    state.fields.album.takeIf { it.isNotBlank() }
-                                                        ?.let { " · $it" }.orEmpty(),
-                                                style = MiuixTheme.textStyles.body2,
-                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
-                                            Spacer(Modifier.height(6.dp))
-                                            Text(
-                                                text = "点击专辑封面进行替换",
-                                                style = MiuixTheme.textStyles.footnote1,
-                                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                            )
-                                        }
-                                    }
-                                    Spacer(Modifier.height(14.dp))
-                                    Button(
-                                        onClick = viewModel::openSearch,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        cornerRadius = 14.dp,
-                                        minHeight = 44.dp,
-                                        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                                        colors = ButtonDefaults.buttonColorsPrimary(),
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .clickable { showCoverDialog = true },
                                     ) {
-                                        Icon(
-                                            MiuixIcons.Download,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
+                                        ArtworkCard(
+                                            bitmap = artworkBitmap,
+                                            modifier = Modifier.size(88.dp),
+                                            corner = 16.dp,
                                         )
-                                        Spacer(Modifier.width(8.dp))
+                                    }
+                                    Spacer(Modifier.width(14.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            "在线匹配所有歌曲信息",
-                                            style = MiuixTheme.textStyles.button,
-                                            fontWeight = FontWeight.Medium,
+                                            text = state.fields.title.ifBlank {
+                                                track.displayName.substringBeforeLast('.')
+                                            },
+                                            style = MiuixTheme.textStyles.title4,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Spacer(Modifier.height(3.dp))
+                                        Text(
+                                            text = state.fields.artist.ifBlank { "未知歌手" } +
+                                                state.fields.album.takeIf { it.isNotBlank() }
+                                                    ?.let { " · $it" }.orEmpty(),
+                                            style = MiuixTheme.textStyles.body2,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Spacer(Modifier.height(5.dp))
+                                        Text(
+                                            text = "点击专辑封面进行替换",
+                                            style = MiuixTheme.textStyles.footnote1,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                                         )
                                     }
-                            }
-                        }
-
-                        item(key = "tags") {
-                            EditorSection(title = "歌曲信息") {
-                                MusicTagTextField(
-                                    value = state.fields.title,
-                                    onValueChange = { viewModel.updateField(EditorField.TITLE, it) },
-                                    label = "标题",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.artist,
-                                    onValueChange = { viewModel.updateField(EditorField.ARTIST, it) },
-                                    label = "歌手",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.album,
-                                    onValueChange = { viewModel.updateField(EditorField.ALBUM, it) },
-                                    label = "专辑",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.year,
-                                    onValueChange = { viewModel.updateField(EditorField.YEAR, it) },
-                                    label = "年份",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.trackNumber,
-                                    onValueChange = { viewModel.updateField(EditorField.TRACK_NUMBER, it) },
-                                    label = "音轨",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.discNumber,
-                                    onValueChange = { viewModel.updateField(EditorField.DISC_NUMBER, it) },
-                                    label = "碟号",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.genre,
-                                    onValueChange = { viewModel.updateField(EditorField.GENRE, it) },
-                                    label = "流派",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.albumArtist,
-                                    onValueChange = { viewModel.updateField(EditorField.ALBUM_ARTIST, it) },
-                                    label = "专辑歌手",
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                MusicTagTextField(
-                                    value = state.fields.comment,
-                                    onValueChange = { viewModel.updateField(EditorField.COMMENT, it) },
-                                    label = "备注",
-                                )
-                            }
-                        }
-
-                        item(key = "lyrics") {
-                            EditorSection(title = "歌词") {
-                                MusicTagTextField(
-                                    value = state.fields.lyrics,
-                                    onValueChange = { viewModel.updateField(EditorField.LYRICS, it) },
-                                    label = "歌词内容",
-                                    singleLine = false,
-                                    minLines = 8,
-                                    maxLines = 16,
-                                    hideLabel = true,
-                                )
-                                Spacer(Modifier.height(6.dp))
-                                Row(
+                                }
+                                Spacer(Modifier.height(12.dp))
+                                Button(
+                                    onClick = viewModel::openSearch,
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                    cornerRadius = 14.dp,
+                                    minHeight = 42.dp,
+                                    insideMargin = PaddingValues(horizontal = 16.dp, vertical = 9.dp),
+                                    colors = ButtonDefaults.buttonColors(),
                                 ) {
-                                    Text(
-                                        text = "已输入 ${state.fields.lyrics.length} 个字符",
-                                        style = MiuixTheme.textStyles.footnote1,
-                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                        modifier = Modifier.weight(1f),
+                                    Icon(
+                                        MiuixIcons.Download,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
                                     )
-                                    IconButton(
-                                        onClick = viewModel::openSearch,
-                                        modifier = Modifier.size(36.dp),
-                                    ) {
-                                        Icon(
-                                            MiuixIcons.Search,
-                                            contentDescription = "在线匹配歌词",
-                                            modifier = Modifier.size(22.dp),
-                                        )
-                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        "在线匹配所有歌曲信息",
+                                        style = MiuixTheme.textStyles.button,
+                                    )
                                 }
                             }
                         }
 
-                        item(key = "fileinfo") {
-                            EditorSection(title = "文件信息") {
-                                InfoRow("格式", track.formatName ?: "未知")
-                                InfoRow("时长", Formats.duration(track.durationMs))
-                                InfoRow("大小", Formats.fileSize(track.sizeBytes))
-                                InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
-                                InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
-                                InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
-                                InfoRow("类型", track.mimeType ?: "未知")
-                                InfoRow("文件名", track.displayName)
-                                InfoRow("文件位置", track.location ?: "未知")
+                        item(key = "editor-tabs") {
+                            MiuixSegmentedControl(
+                                options = listOf("歌曲信息", "歌词", "文件信息"),
+                                selectedIndex = selectedTab,
+                                onSelected = { selectedTab = it },
+                                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                            )
+                        }
+
+                        when (selectedTab) {
+                            0 -> item(key = "tags") {
+                                EditorTabCard {
+                                    MusicTagTextField(
+                                        value = state.fields.title,
+                                        onValueChange = { viewModel.updateField(EditorField.TITLE, it) },
+                                        label = "标题",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.artist,
+                                        onValueChange = { viewModel.updateField(EditorField.ARTIST, it) },
+                                        label = "歌手",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.album,
+                                        onValueChange = { viewModel.updateField(EditorField.ALBUM, it) },
+                                        label = "专辑",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.year,
+                                        onValueChange = { viewModel.updateField(EditorField.YEAR, it) },
+                                        label = "年份",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.trackNumber,
+                                        onValueChange = { viewModel.updateField(EditorField.TRACK_NUMBER, it) },
+                                        label = "音轨",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.discNumber,
+                                        onValueChange = { viewModel.updateField(EditorField.DISC_NUMBER, it) },
+                                        label = "碟号",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.genre,
+                                        onValueChange = { viewModel.updateField(EditorField.GENRE, it) },
+                                        label = "流派",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.albumArtist,
+                                        onValueChange = { viewModel.updateField(EditorField.ALBUM_ARTIST, it) },
+                                        label = "专辑歌手",
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    MusicTagTextField(
+                                        value = state.fields.comment,
+                                        onValueChange = { viewModel.updateField(EditorField.COMMENT, it) },
+                                        label = "备注",
+                                    )
+                                }
+                            }
+
+                            1 -> item(key = "lyrics") {
+                                EditorTabCard {
+                                    MusicTagTextField(
+                                        value = state.fields.lyrics,
+                                        onValueChange = { viewModel.updateField(EditorField.LYRICS, it) },
+                                        label = "歌词内容",
+                                        singleLine = false,
+                                        minLines = 8,
+                                        maxLines = 18,
+                                        hideLabel = true,
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = "已输入 ${state.fields.lyrics.length} 个字符",
+                                            style = MiuixTheme.textStyles.footnote1,
+                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        IconButton(
+                                            onClick = viewModel::openSearch,
+                                            modifier = Modifier.size(36.dp),
+                                        ) {
+                                            Icon(
+                                                MiuixIcons.Search,
+                                                contentDescription = "在线匹配歌词",
+                                                modifier = Modifier.size(22.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            else -> item(key = "fileinfo") {
+                                EditorTabCard {
+                                    InfoRow("格式", track.formatName ?: "未知")
+                                    InfoRow("时长", Formats.duration(track.durationMs))
+                                    InfoRow("大小", Formats.fileSize(track.sizeBytes))
+                                    InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
+                                    InfoRow("采样率", track.sampleRateHz?.let { "$it Hz" } ?: "未知")
+                                    InfoRow("声道", track.channels?.let { "$it 声道" } ?: "未知")
+                                    InfoRow("类型", track.mimeType ?: "未知")
+                                    InfoRow("文件名", track.displayName)
+                                    InfoRow("文件位置", track.location ?: "未知")
+                                }
                             }
                         }
                     }
@@ -441,9 +454,6 @@ fun EditorScreen(
     }
 }
 
-@Suppress("unused")
-private val unusedR = R.drawable.ic_music_note
-
 /** Section label placed above its white card, matching the settings layout. */
 @Composable
 private fun EditorSection(
@@ -456,7 +466,15 @@ private fun EditorSection(
             insideMargin = PaddingValues(start = 16.dp, end = 16.dp, bottom = 6.dp),
         )
         Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
-            Column(modifier = Modifier.padding(16.dp)) { content() }
+            Column(modifier = Modifier.padding(14.dp)) { content() }
         }
+    }
+}
+
+/** Card used by the tab contents; the tab label already carries the section name. */
+@Composable
+private fun EditorTabCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
+        Column(modifier = Modifier.padding(16.dp)) { content() }
     }
 }

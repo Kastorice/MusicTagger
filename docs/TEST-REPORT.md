@@ -156,10 +156,51 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   常驻右下角。截图：`docs/screenshots/02-editor.png`。
 - 验证：`:app:assembleDebug` 通过；模拟器逐项截图确认。
 
+### 第七轮 v1.1.0（2026-11-14）
+
+**编辑页 Tabs**
+
+- 「歌曲信息 / 歌词 / 文件信息」改为设置页同款 `MiuixSegmentedControl`，封面卡片保留在顶部，
+  仅组合当前 Tab；Tab 状态 `rememberSaveable` 保存。
+- 歌词 Tab 字符数与搜索图标同一行垂直居中，歌词框 `minLines` 收紧到 8，底部控件不再被 FAB 遮挡。
+- 验证：模拟器切换三个 Tab 截图正常，release APK 中编辑 → 保存成功。
+
+**MiuiX 细节**
+
+- 全局字号再收紧：title1 29、title2 21、title3 18、title4 16 sp；设置页组间距 22→18 dp，
+  分组标题上边距 4→2 dp；曲库缩略图 56→52 dp、卡片内边距 12→11 dp、列表间距 10→8 dp。
+- 「在线匹配所有歌曲信息」由主色按钮改为中性 `ButtonDefaults.buttonColors()` 灰底，
+  减少页面内的强调色数量。
+
+**性能与体积**
+
+- 缩略图默认解码尺寸 320→192 px，≤256 px 使用 RGB_565；LRU 缓存 24→32 项，
+  降低滚动时的解码与内存压力。
+- 移除未使用的 `MiuixSectionCard`、`putThumbnail` 与 `ui-tooling-preview` 依赖。
+- release 开启 R8（`isMinifyEnabled` / `isShrinkResources`），仅保留 `zh` / `en` 资源；
+  `android.enableR8.fullMode=false` 降低 MiuiX 大量图标带来的 R8 耗时与内存占用。
+- 修复 `gradle.properties` 的 UTF-8 BOM 导致 `org.gradle.jvmargs` 被忽略的问题（daemon 一直
+  以 512 MB 运行、R8 OOM）；堆调整为 8 GB 后 release 构建约 1 分钟完成。
+- 结果：release APK **1,572,049 字节（约 1.5 MB）**，相比 v1.0.0 debug 约 20.3 MB 大幅缩小。
+
+**Spotify 源**
+
+- 已开启代理（出口新加坡）后测试：`open.spotify.com/get_access_token` 仍返回
+  `403 URL Blocked`，`open.spotify.com/api/token` 明确返回「Usage of this endpoint is not permitted」；
+  官方 Web API 需 OAuth Client ID/Secret 且不提供歌词接口。按约定本次不接入，保留网易云 / QQ。
+
+**验证**
+
+- `:core:test` 154 tests / 0 failures。
+- release APK 在 API 36 模拟器安装，打开编辑页三个 Tab、保存标题修改并通过 `mutagen` 校验
+  （`title=晴天1`），`ffmpeg` 解码退出 0；随后恢复测试素材。
+- R8 输出 Kotlin metadata 解析警告（Kotlin 2.3.20 高于 R8 内置版本），运行时功能已验证正常。
+
 ## 3. 构建产物
 
-- `app/build/outputs/apk/debug/app-debug.apk`（约 19.4 MB，debug 签名，minSdk 26 / targetSdk 36）
-- `dist/MusicTagger-v1.0.0-debug.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
+- `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
+- `dist/MusicTagger-v1.1.0.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

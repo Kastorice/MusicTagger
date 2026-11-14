@@ -1,4 +1,4 @@
-package com.musictag.app.data
+﻿package com.musictag.app.data
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -18,12 +18,12 @@ import java.io.File
  */
 class ArtworkRepository(private val context: Context) {
 
-    private val cache = object : LruCache<String, Bitmap>(24) {
+    private val cache = object : LruCache<String, Bitmap>(32) {
         override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount / 1024
     }
 
     /** Loads a downsampled thumbnail from the file's embedded picture. */
-    suspend fun loadThumbnail(uri: Uri, maxSizePx: Int = 320): Bitmap? = withContext(Dispatchers.IO) {
+    suspend fun loadThumbnail(uri: Uri, maxSizePx: Int = 192): Bitmap? = withContext(Dispatchers.IO) {
         val key = "thumb:${uri}:$maxSizePx"
         cache.get(key)?.let { return@withContext it }
         val bytes = readEmbeddedPicture(uri) ?: return@withContext null
@@ -42,18 +42,9 @@ class ArtworkRepository(private val context: Context) {
         decodeSampled(file.readBytes(), maxSizePx)
     }
 
-    /** Stores the just-saved cover as the list thumbnail. */
-    fun putThumbnail(uri: String, bitmap: Bitmap?) {
-        if (bitmap == null) {
-            cache.remove("thumb:$uri:320")
-        } else {
-            cache.put("thumb:$uri:320", bitmap)
-        }
-    }
-
     /** Drops the cached list thumbnail for [uri] after its cover was rewritten. */
     fun invalidateThumbnail(uri: String) {
-        cache.remove("thumb:$uri:320")
+        cache.remove("thumb:$uri:192")
     }
 
     fun clear() = cache.evictAll()
@@ -115,7 +106,7 @@ class ArtworkRepository(private val context: Context) {
         }
         val options = BitmapFactory.Options().apply {
             inSampleSize = sampleSize
-            inPreferredConfig = Bitmap.Config.ARGB_8888
+            inPreferredConfig = if (maxSizePx <= 256) Bitmap.Config.RGB_565 else Bitmap.Config.ARGB_8888
         }
         return try {
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)

@@ -1,4 +1,4 @@
-package com.musictag.app.ui.library
+﻿package com.musictag.app.ui.library
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.clickable
@@ -98,8 +98,8 @@ fun LibraryScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item(key = "search") {
                     val keyboard = LocalSoftwareKeyboardController.current
@@ -159,11 +159,11 @@ private fun TrackRow(
         cornerRadius = 16.dp,
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(11.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ArtworkCard(bitmap = bitmap, modifier = Modifier.size(56.dp), corner = 12.dp)
-            Spacer(Modifier.width(12.dp))
+            ArtworkCard(bitmap = bitmap, modifier = Modifier.size(52.dp), corner = 12.dp)
+            Spacer(Modifier.width(11.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title?.takeIf { it.isNotBlank() } ?: item.displayName.substringBeforeLast('.'),
@@ -200,12 +200,12 @@ private fun TrackRow(
             Box {
                 IconButton(
                     onClick = onOpenWith,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(38.dp),
                 ) {
                     Icon(
                         MiuixIcons.Play,
                         contentDescription = "选择打开方式",
-                        modifier = Modifier.size(22.dp),
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }

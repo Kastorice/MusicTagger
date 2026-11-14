@@ -14,14 +14,17 @@ android {
         applicationId = "com.musictag.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         vectorDrawables { useSupportLibrary = true }
+        resourceConfigurations += listOf("zh", "en")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -73,7 +76,6 @@ dependencies {
 
     implementation("androidx.compose.ui:ui:1.10.3")
     implementation("androidx.compose.ui:ui-graphics:1.10.3")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.10.3")
     implementation("androidx.compose.foundation:foundation:1.10.3")
     implementation("androidx.compose.animation:animation:1.10.3")
 

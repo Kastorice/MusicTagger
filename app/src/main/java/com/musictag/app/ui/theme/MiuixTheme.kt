@@ -1,4 +1,4 @@
-package com.musictag.app.ui.theme
+﻿package com.musictag.app.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -33,10 +33,10 @@ private val CompactTextStyles: TextStyles = defaultTextStyles(
     headline1 = TextStyle(fontSize = 16.sp),
     headline2 = TextStyle(fontSize = 15.sp),
     subtitle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal),
-    title1 = TextStyle(fontSize = 30.sp),
-    title2 = TextStyle(fontSize = 22.sp),
-    title3 = TextStyle(fontSize = 19.sp),
-    title4 = TextStyle(fontSize = 17.sp),
+    title1 = TextStyle(fontSize = 29.sp),
+    title2 = TextStyle(fontSize = 21.sp),
+    title3 = TextStyle(fontSize = 18.sp),
+    title4 = TextStyle(fontSize = 16.sp),
 )
 
 /**

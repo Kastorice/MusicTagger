@@ -1,4 +1,4 @@
-package com.musictag.app.ui.components
+﻿package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,8 +49,6 @@ import com.musictag.app.data.NetworkImageLoader
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -125,44 +122,6 @@ fun FormatBadge(text: String?) {
             .background(MiuixTheme.colorScheme.secondaryContainer)
             .padding(horizontal = 6.dp, vertical = 2.dp),
     )
-}
-
-/** Standard grouped card used by the editor and settings screens. */
-@Composable
-fun MiuixSectionCard(
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    trailing: (@Composable () -> Unit)? = null,
-    contentPadding: Dp = 16.dp,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        cornerRadius = 16.dp,
-        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(modifier = Modifier.padding(vertical = 6.dp)) {
-            if (title != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = title,
-                        style = MiuixTheme.textStyles.subtitle,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                    trailing?.invoke()
-                }
-            }
-            Column(modifier = Modifier.padding(horizontal = contentPadding)) {
-                content()
-            }
-        }
-    }
 }
 
 @Composable

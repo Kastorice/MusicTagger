@@ -1,4 +1,4 @@
-package com.musictag.app.ui.settings
+﻿package com.musictag.app.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
@@ -67,8 +67,8 @@ fun SettingsScreen(
     Column(modifier = modifier.fillMaxSize().padding(contentPadding)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             item {
                 SettingsGroup(title = "外观") {
@@ -181,7 +181,7 @@ private fun SettingsGroup(title: String, content: @Composable () -> Unit) {
             modifier = Modifier.wrapContentHeight(),
             // Align with the card's inner content (card margin 16 + row inset 16),
             // matching the HyperOS/LSPosed settings layout.
-            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 6.dp),
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 5.dp),
         )
         Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
             Column { content() }

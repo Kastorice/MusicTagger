@@ -176,7 +176,6 @@ class EditorViewModel(private val container: AppContainer) : ViewModel() {
                             ),
                         )
                     }
-                    refreshThumbnail(outcome.item, outcome.artwork)
                     _events.send(EditorEvent.Saved(outcome.item))
                     _events.send(EditorEvent.Message("标签已保存到文件"))
                 }
@@ -394,17 +393,6 @@ class EditorViewModel(private val container: AppContainer) : ViewModel() {
         artworkRepository.decode(bytes, maxSizePx)
 
     fun consumeMessage() = Unit
-
-    private fun refreshThumbnail(item: TrackItem, artwork: Artwork?) {
-        viewModelScope.launch {
-            val bitmap = if (artwork != null) {
-                withContext(Dispatchers.IO) { artworkRepository.decode(artwork.bytes, 320) }
-            } else {
-                null
-            }
-            artworkRepository.putThumbnail(item.uri, bitmap)
-        }
-    }
 
     private companion object {
         const val TAG = "EditorViewModel"
