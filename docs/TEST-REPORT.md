@@ -196,11 +196,24 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   （`title=晴天1`），`ffmpeg` 解码退出 0；随后恢复测试素材。
 - R8 输出 Kotlin metadata 解析警告（Kotlin 2.3.20 高于 R8 内置版本），运行时功能已验证正常。
 
+### 第八轮 v1.2.0（2026-11-14）
+
+- 歌词输入框由 MiuiX `TextField` 改为自绘 `BasicTextField`：
+  - `minLines = 6`、`maxLines = Int.MAX_VALUE`、无固定高度，随歌词行数自动增高；
+  - `FontFamily.Monospace` 等宽字体，13sp / 20sp 行高；
+  - `VisualTransformation` 将 `[...]`（LRC 时间轴与 `[ti:]` / `[ar:]` 等）着色为强调色；
+  - 聚焦时 1dp 强调色描边，未聚焦为中性圆角背景。
+- 切到歌词 Tab 时，保存 FAB 左侧出现 52dp 圆形搜索 FAB（次级灰底 + 阴影），
+  点击打开在线匹配；离开歌词 Tab 自动隐藏。歌词卡片底部仅保留字符数。
+- 验证：debug/release 均编译通过；release APK 在 API 36 模拟器打开歌词 Tab 正常，
+  搜索 FAB 位于保存 FAB 左侧（desc=在线匹配歌词，bounds 522–580/2206–2264），无崩溃。
+- 版本 `versionCode 3` / `versionName 1.2.0`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.1.0.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.0.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

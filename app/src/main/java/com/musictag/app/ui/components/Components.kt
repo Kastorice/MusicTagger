@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.components
+package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -6,7 +6,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,10 +43,18 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.musictag.app.R
 import com.musictag.app.data.NetworkImageLoader
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -370,6 +381,67 @@ fun MusicTagTextField(
         backgroundColor = MiuixTheme.colorScheme.secondaryContainer,
         textStyle = MiuixTheme.textStyles.body1,
     )
+}
+
+/**
+ * Auto-growing lyrics editor: monospace text like a log/code panel, with every
+ * `[...]` segment (LRC timestamps and metadata) tinted with the accent color.
+ * It has no fixed height and expands as lines are added.
+ */
+@Composable
+fun LyricsTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tagColor = MiuixTheme.colorScheme.primary
+    val textColor = MiuixTheme.colorScheme.onSurface
+    val transformation = remember(tagColor) { LyricsTagTransformation(tagColor) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
+    val shape = RoundedCornerShape(12.dp)
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MiuixTheme.colorScheme.secondaryContainer)
+            .border(
+                width = 1.dp,
+                color = if (focused) MiuixTheme.colorScheme.primary else Color.Transparent,
+                shape = shape,
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        textStyle = TextStyle(
+            fontFamily = FontFamily.Monospace,
+            fontSize = 13.sp,
+            lineHeight = 20.sp,
+            color = textColor,
+        ),
+        cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
+        visualTransformation = transformation,
+        minLines = 6,
+        maxLines = Int.MAX_VALUE,
+        interactionSource = interactionSource,
+    )
+}
+
+private class LyricsTagTransformation(private val tagColor: Color) : VisualTransformation {
+    private val tagRegex = Regex("\\[[^\\]\\n]*\\]")
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        val highlighted = AnnotatedString.Builder(text.text).apply {
+            tagRegex.findAll(text.text).forEach { match ->
+                addStyle(
+                    SpanStyle(color = tagColor, fontWeight = FontWeight.Medium),
+                    match.range.first,
+                    match.range.last + 1,
+                )
+            }
+        }.toAnnotatedString()
+        return TransformedText(highlighted, OffsetMapping.Identity)
+    }
 }
 
 /**

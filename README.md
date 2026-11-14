@@ -1,4 +1,4 @@
-# 音签 · MusicTagger
+﻿# 音签 · MusicTagger
 
 一个 **MIUI / HyperOS 风格**（基于 [MiuiX](https://github.com/compose-miuix-ui/miuix)）的 Android
 本地音乐标签编辑器：选择本地音频文件，编辑歌曲名、歌手、专辑、年份、音轨、流派、歌词与专辑封面，
@@ -62,7 +62,8 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
   可选择在线匹配 / 本地图片 / 移除；可选 Material You 动态取色；深色模式跟随系统；应用图标为
   白底 queue_music 线性图标。
 - **编辑页 Tabs**：专辑封面卡片下方用与设置页一致的分段控件切换「歌曲信息 / 歌词 / 文件信息」，
-  每次只组合当前 Tab，减少长列表与大量输入框带来的滑动掉帧。
+  每次只组合当前 Tab，减少长列表与大量输入框带来的滑动掉帧。歌词 Tab 使用等宽字体、自动增高的
+  输入框，并对 `[...]` 时间轴/元数据着色；切到歌词 Tab 时保存 FAB 左侧出现圆形搜索 FAB。
 - **曲库与文件信息**：卡片上的播放按钮可直接调起系统「选择打开方式」；搜索框有清除按钮；
   编辑页展示格式、时长、大小、比特率、采样率、声道、MIME、文件名与 SAF 路径；「关于」中提供
   项目 GitHub 链接。
@@ -121,7 +122,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.1.0.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.0.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 

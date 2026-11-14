@@ -1,4 +1,4 @@
-package com.musictag.app.ui.editor
+﻿package com.musictag.app.ui.editor
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import com.musictag.app.ui.components.ArtworkCard
 import com.musictag.app.ui.components.ErrorState
 import com.musictag.app.ui.components.InfoRow
 import com.musictag.app.ui.components.LoadingState
+import com.musictag.app.ui.components.LyricsTextField
 import com.musictag.app.ui.components.MiuixExtendedFloatingActionButton
 import com.musictag.app.ui.components.MiuixSegmentedControl
 import com.musictag.app.ui.components.MusicTagTextField
@@ -60,6 +62,7 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
@@ -151,18 +154,26 @@ fun EditorScreen(
         },
         floatingActionButton = {
             if (state.track != null) {
-                MiuixExtendedFloatingActionButton(
-                    text = if (state.saving) "保存中…" else "保存到文件",
-                    onClick = {
-                        if (state.hasChanges) {
-                            viewModel.save()
-                        } else {
-                            scope.launch { snackbarHostState.showSnackbar("没有需要保存的修改") }
-                        }
-                    },
-                    enabled = !state.saving,
-                    icon = MiuixIcons.Download,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    if (selectedTab == 1) {
+                        LyricsSearchFab(onClick = viewModel::openSearch)
+                    }
+                    MiuixExtendedFloatingActionButton(
+                        text = if (state.saving) "保存中…" else "保存到文件",
+                        onClick = {
+                            if (state.hasChanges) {
+                                viewModel.save()
+                            } else {
+                                scope.launch { snackbarHostState.showSnackbar("没有需要保存的修改") }
+                            }
+                        },
+                        enabled = !state.saving,
+                        icon = MiuixIcons.Download,
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -319,37 +330,16 @@ fun EditorScreen(
 
                             1 -> item(key = "lyrics") {
                                 EditorTabCard {
-                                    MusicTagTextField(
+                                    LyricsTextField(
                                         value = state.fields.lyrics,
                                         onValueChange = { viewModel.updateField(EditorField.LYRICS, it) },
-                                        label = "歌词内容",
-                                        singleLine = false,
-                                        minLines = 8,
-                                        maxLines = 18,
-                                        hideLabel = true,
                                     )
-                                    Spacer(Modifier.height(4.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = "已输入 ${state.fields.lyrics.length} 个字符",
-                                            style = MiuixTheme.textStyles.footnote1,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        IconButton(
-                                            onClick = viewModel::openSearch,
-                                            modifier = Modifier.size(36.dp),
-                                        ) {
-                                            Icon(
-                                                MiuixIcons.Search,
-                                                contentDescription = "在线匹配歌词",
-                                                modifier = Modifier.size(22.dp),
-                                            )
-                                        }
-                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                    Text(
+                                        text = "已输入 ${state.fields.lyrics.length} 个字符",
+                                        style = MiuixTheme.textStyles.footnote1,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                    )
                                 }
                             }
 
@@ -476,5 +466,28 @@ private fun EditorSection(
 private fun EditorTabCard(content: @Composable ColumnScope.() -> Unit) {
     Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
         Column(modifier = Modifier.padding(16.dp)) { content() }
+    }
+}
+
+/** Circular search FAB shown next to the save FAB while the lyrics tab is active. */
+@Composable
+private fun LyricsSearchFab(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .size(52.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = MiuixTheme.colorScheme.secondaryContainer,
+        contentColor = MiuixTheme.colorScheme.onSecondaryContainer,
+        shadowElevation = 10.dp,
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = MiuixIcons.Search,
+                contentDescription = "在线匹配歌词",
+                modifier = Modifier.size(22.dp),
+            )
+        }
     }
 }
