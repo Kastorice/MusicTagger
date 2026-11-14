@@ -1,4 +1,4 @@
-﻿package com.musictag.app.ui.components
+package com.musictag.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -80,6 +80,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
+import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.miuixCapsuleShape
@@ -153,7 +154,7 @@ fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         title = label,
         summary = value,
-        insideMargin = PaddingValues(horizontal = 0.dp, vertical = 10.dp),
+        insideMargin = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     )
 }
 
@@ -579,6 +580,7 @@ fun MiuixOverflowMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     items: List<Pair<String, () -> Unit>>,
+    selectedLabel: String? = null,
 ) {
     var visible by remember { mutableStateOf(expanded) }
     val progress = remember { Animatable(0f) }
@@ -637,6 +639,18 @@ fun MiuixOverflowMenu(
                             action()
                         },
                         insideMargin = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                        endActions = if (label == selectedLabel) {
+                            {
+                                Icon(
+                                    imageVector = MiuixIcons.Ok,
+                                    contentDescription = null,
+                                    tint = MiuixTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        } else {
+                            null
+                        },
                     )
                 }
             }

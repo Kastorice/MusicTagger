@@ -33,6 +33,8 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
 
 关于音签与 GitHub 链接：`docs/screenshots/13-about.png`
 
+设置页在线数据源选择器：`docs/screenshots/18-settings-source.png`
+
 曲库搜索（实时过滤，输入框内清除 + 右侧取消；无结果时不显示任何占位文案）：
 `docs/screenshots/14-search.png` / `docs/screenshots/15-search-empty.png`
 
@@ -122,7 +124,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.2.4.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.5.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 

@@ -251,11 +251,26 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
 - release APK 1,588,990 字节（约 1.5 MB）；154 个单测通过。
 - 版本 `versionCode 7` / `versionName 1.2.4`。
 
+### 第十三轮 v1.2.5（2026-11-15）
+
+- 封面弹窗：首项改为「在线匹配专辑封面」，删除灰色说明与 HorizontalDivider。
+- 主页切换：Crossfade 替换为 AnimatedContent + 左右 slideIn/OutHorizontally（280ms，
+  按 tab 方向反向），不再使用淡入淡出。
+- 预见性返回：编辑页引入 PredictiveBackHandler，手势进度映射到 Scaffold graphicsLayer.translationX；
+  取消回弹、完成关闭，存在未保存修改时弹确认框。设置页 BackHandler 回到曲库。
+- 曲库搜索：移除「取消」按钮；BackHandler 在查询非空时清空搜索并收起键盘，返回主页。
+- 文件信息：InfoRow 改为 16dp 水平 / 8dp 垂直内边距，DetailSection 卡片不再额外加 padding，
+  与卡片边缘和上下间距对齐。
+- 设置在线数据源：删除 API 地址输入框与说明，网易云 / QQ 统一保留在选择器中。
+- release APK 1,588,989 字节（约 1.5 MB）；API 36 模拟器验证返回层级、搜索清空、弹窗与文件信息布局，
+  154 个单测通过。
+- 版本 `versionCode 8` / `versionName 1.2.5`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.4.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.5.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

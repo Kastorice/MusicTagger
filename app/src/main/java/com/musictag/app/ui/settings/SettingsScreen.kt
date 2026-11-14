@@ -1,8 +1,9 @@
-﻿package com.musictag.app.ui.settings
+package com.musictag.app.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,11 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,15 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import com.musictag.app.BuildConfig
 import com.musictag.app.data.model.AppSettings
-import com.musictag.app.ui.components.MiuixSegmentedControl
-import com.musictag.app.ui.components.MusicTagTextField
+import com.musictag.app.ui.components.MiuixOverflowMenu
 import com.musictag.core.net.MusicSourceId
-import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -48,21 +48,12 @@ fun SettingsScreen(
     contentPadding: PaddingValues,
     onDynamicColorChange: (Boolean) -> Unit,
     onSourceChange: (MusicSourceId) -> Unit,
-    onNeteaseApiBaseChange: (String) -> Unit,
     onOpenGithub: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var apiBaseDraft by remember(settings.neteaseApiBase) { mutableStateOf(settings.neteaseApiBase) }
     val sources = MusicSourceId.entries
     val dynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-
-    // No explicit save button: persist once the user stops editing.
-    LaunchedEffect(apiBaseDraft) {
-        if (apiBaseDraft.trim() != settings.neteaseApiBase.trim()) {
-            delay(700)
-            onNeteaseApiBaseChange(apiBaseDraft)
-        }
-    }
+    var sourceMenuExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(contentPadding)) {
         LazyColumn(
@@ -88,30 +79,38 @@ fun SettingsScreen(
 
             item {
                 SettingsGroup(title = "在线数据源") {
-                    BasicComponent(
-                        title = "默认搜索平台",
-                        summary = "用于歌词与封面的在线匹配（非官方接口）",
-                    )
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)) {
-                        MiuixSegmentedControl(
-                            options = sources.map { it.displayName },
-                            selectedIndex = sources.indexOf(settings.preferredSource).coerceAtLeast(0),
-                            onSelected = { index -> onSourceChange(sources[index]) },
-                            modifier = Modifier.fillMaxWidth(),
+                    Box {
+                        BasicComponent(
+                            title = "默认搜索平台",
+                            summary = "用于歌词与封面的在线匹配（非官方接口）",
+                            onClick = { sourceMenuExpanded = true },
+                            endActions = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = settings.preferredSource.displayName,
+                                        style = MiuixTheme.textStyles.body2,
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Icon(
+                                        imageVector = MiuixIcons.ChevronForward,
+                                        contentDescription = null,
+                                        tint = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                        modifier = Modifier.size(16.dp).rotate(90f),
+                                    )
+                                }
+                            },
                         )
-                    }
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-                        MusicTagTextField(
-                            value = apiBaseDraft,
-                            onValueChange = { apiBaseDraft = it },
-                            label = "网易云音乐 API 地址（可选）",
-                            singleLine = true,
-                        )
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "直连失败时可填写自建 NeteaseCloudMusicApi 地址，例如 http://192.168.1.10:3000；留空使用默认接口。",
-                            style = MiuixTheme.textStyles.body2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        MiuixOverflowMenu(
+                            expanded = sourceMenuExpanded,
+                            onDismissRequest = { sourceMenuExpanded = false },
+                            selectedLabel = settings.preferredSource.displayName,
+                            items = sources.map { source ->
+                                source.displayName to {
+                                    onSourceChange(source)
+                                    sourceMenuExpanded = false
+                                }
+                            },
                         )
                     }
                 }

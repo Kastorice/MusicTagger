@@ -4,14 +4,18 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -141,6 +145,9 @@ fun MusicTagApp(
 
     LaunchedEffect(Unit) { container.pruneEditCache() }
 
+    // Back from the settings tab returns to the library instead of leaving the app.
+    BackHandler(enabled = editorUri == null && tab == 1) { tab = 0 }
+
     fun closeEditor() {
         val closingUri = editorUri
         editorViewModel.close()
@@ -237,7 +244,25 @@ fun MusicTagApp(
             floatingActionButtonPosition = FabPosition.End,
             snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { padding ->
-            Crossfade(targetState = tab, label = "tab") { currentTab ->
+            AnimatedContent(
+                targetState = tab,
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        slideInHorizontally(
+                            animationSpec = tween(280, easing = FastOutSlowInEasing),
+                        ) { it } togetherWith slideOutHorizontally(
+                            animationSpec = tween(280, easing = FastOutSlowInEasing),
+                        ) { -it }
+                    } else {
+                        slideInHorizontally(
+                            animationSpec = tween(280, easing = FastOutSlowInEasing),
+                        ) { -it } togetherWith slideOutHorizontally(
+                            animationSpec = tween(280, easing = FastOutSlowInEasing),
+                        ) { it }
+                    }
+                },
+                label = "tab",
+            ) { currentTab ->
                 if (currentTab == 0) {
                     LibraryScreen(
                         state = libraryState,
@@ -259,9 +284,6 @@ fun MusicTagApp(
                         contentPadding = padding,
                         onDynamicColorChange = container.settingsStore::setDynamicColor,
                         onSourceChange = container.settingsStore::setPreferredSource,
-                        onNeteaseApiBaseChange = { base ->
-                            container.settingsStore.setNeteaseApiBase(base)
-                        },
                         onOpenGithub = {
                             val link = Intent(
                                 Intent.ACTION_VIEW,

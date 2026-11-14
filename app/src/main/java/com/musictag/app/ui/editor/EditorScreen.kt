@@ -2,7 +2,7 @@
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -38,7 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,7 +58,6 @@ import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FabPosition
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -72,7 +72,6 @@ import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.Download
 import top.yukonga.miuix.kmp.icon.extended.Search
 import kotlinx.coroutines.launch
 
@@ -96,6 +95,7 @@ fun EditorScreen(
     var showCoverDialog by remember { mutableStateOf(false) }
     var pendingSaveAsName by remember { mutableStateOf<String?>(null) }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var backProgress by remember { mutableFloatStateOf(0f) }
     val listState = rememberLazyListState()
     val saveExpanded by remember {
         derivedStateOf {
@@ -145,14 +145,34 @@ fun EditorScreen(
     val requestClose: () -> Unit = {
         if (state.hasChanges) showDiscardDialog = true else onClose()
     }
-    BackHandler(enabled = true) { requestClose() }
+    PredictiveBackHandler(enabled = true) { progressFlow ->
+        var committed = false
+        try {
+            progressFlow.collect { event ->
+                backProgress = event.progress.coerceIn(0f, 1f)
+            }
+            committed = true
+        } finally {
+            if (!committed) backProgress = 0f
+        }
+        if (committed) {
+            if (state.hasChanges) {
+                backProgress = 0f
+                showDiscardDialog = true
+            } else {
+                onClose()
+            }
+        }
+    }
 
     val artworkBitmap by produceState<Bitmap?>(initialValue = null, key1 = state.artwork) {
         value = state.artwork?.let { viewModel.previewBitmap(it.bytes, 512) }
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().graphicsLayer {
+            translationX = backProgress * size.width
+        },
         topBar = {
             SmallTopAppBar(
                 title = "编辑标签",
@@ -344,7 +364,7 @@ fun EditorScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
-                                    EditorSection(title = "音频参数") {
+                                    DetailSection(title = "音频参数") {
                                         InfoRow("格式", track.formatName ?: "未知")
                                         InfoRow("时长", Formats.duration(track.durationMs))
                                         InfoRow("比特率", track.bitrateKbps?.let { "$it kbps" } ?: "未知")
@@ -353,13 +373,13 @@ fun EditorScreen(
                                         InfoRow("位深", track.bitDepth?.let { "$it bit" } ?: "未知")
                                         InfoRow("编码", track.codecName ?: track.codecMime ?: "未知")
                                     }
-                                    EditorSection(title = "文件") {
+                                    DetailSection(title = "文件") {
                                         InfoRow("大小", Formats.fileSize(track.sizeBytes))
                                         InfoRow("文件名", track.displayName)
                                         InfoRow("文件位置", track.location ?: "未知")
                                         InfoRow("最后修改", Formats.dateTime(track.lastModified))
                                     }
-                                    EditorSection(title = "封面与歌词") {
+                                    DetailSection(title = "封面与歌词") {
                                         InfoRow("封面", if (state.artwork != null) "已嵌入" else "无")
                                         InfoRow(
                                             "封面尺寸",
@@ -392,18 +412,15 @@ fun EditorScreen(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     BasicComponent(
-                        title = "在线匹配所有歌曲信息",
-                        summary = "从网易云 / QQ 音乐获取封面、歌词与歌曲信息",
+                        title = "在线匹配专辑封面",
                         onClick = {
                             showCoverDialog = false
                             viewModel.openSearch()
                         },
                         insideMargin = PaddingValues(horizontal = 0.dp, vertical = 12.dp),
                     )
-                    HorizontalDivider()
                     BasicComponent(
                         title = "从本地选择图片",
-                        summary = "从文件中选择一张图片作为专辑封面",
                         onClick = {
                             showCoverDialog = false
                             imagePicker.launch(arrayOf("image/*"))
@@ -411,7 +428,6 @@ fun EditorScreen(
                         insideMargin = PaddingValues(horizontal = 0.dp, vertical = 12.dp),
                     )
                     if (state.artwork != null) {
-                        HorizontalDivider()
                         BasicComponent(
                             title = "移除当前封面",
                             onClick = {
@@ -464,6 +480,23 @@ fun EditorScreen(
                 onBackToResults = viewModel::clearMatchSelection,
                 onApply = viewModel::applyMatch,
             )
+        }
+    }
+}
+
+/** File-info section: label above a card whose rows carry their own 16dp inset. */
+@Composable
+private fun DetailSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SmallTitle(
+            text = title,
+            insideMargin = PaddingValues(start = 16.dp, end = 16.dp, bottom = 5.dp),
+        )
+        Card(modifier = Modifier.fillMaxWidth(), cornerRadius = 16.dp) {
+            Column { content() }
         }
     }
 }

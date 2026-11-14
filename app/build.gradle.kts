@@ -14,8 +14,8 @@ android {
         applicationId = "com.musictag.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.2.4"
+        versionCode = 8
+        versionName = "1.2.5"
         vectorDrawables { useSupportLibrary = true }
         resourceConfigurations += listOf("zh", "en")
     }
