@@ -38,6 +38,16 @@
 匿名 web-player token 接口在启用代理后仍被 Spotify 以 `403 URL Blocked` 拒绝，`/api/token` 也明确
 返回不允许使用。因此保留网易云 / QQ 两个数据源，避免不可靠的抓取实现。
 
+## 截图
+
+| 曲库 | 编辑页 Tabs | 歌词 Tab |
+|---|---|---|
+| ![曲库](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/01-library.png) | ![编辑](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/02-editor.png) | ![歌词](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/03-lyrics.png) |
+
+| 文件信息 Tab | 设置 | 关于 |
+|---|---|---|
+| ![文件信息](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/12-file-info.png) | ![设置](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/06-settings.png) | ![关于](https://raw.githubusercontent.com/Kastorice/MusicTagger/main/docs/screenshots/13-about.png) |
+
 ## 质量
 
 - 154 个 `:core` 单元测试全部通过；
