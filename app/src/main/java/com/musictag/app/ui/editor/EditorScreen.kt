@@ -6,6 +6,7 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -96,6 +98,7 @@ fun EditorScreen(
     var pendingSaveAsName by remember { mutableStateOf<String?>(null) }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var backProgress by remember { mutableFloatStateOf(0f) }
+    var swipeDistance by remember { mutableFloatStateOf(0f) }
     val listState = rememberLazyListState()
     val saveExpanded by remember {
         derivedStateOf {
@@ -214,7 +217,28 @@ fun EditorScreen(
         floatingActionButtonPosition = FabPosition.End,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(selectedTab) {
+                    detectHorizontalDragGestures(
+                        onDragStart = { swipeDistance = 0f },
+                        onHorizontalDrag = { change, dragAmount ->
+                            change.consume()
+                            swipeDistance += dragAmount
+                        },
+                        onDragCancel = { swipeDistance = 0f },
+                        onDragEnd = {
+                            val threshold = 64.dp.toPx()
+                            when {
+                                swipeDistance <= -threshold && selectedTab < 2 -> selectedTab++
+                                swipeDistance >= threshold && selectedTab > 0 -> selectedTab--
+                            }
+                            swipeDistance = 0f
+                        },
+                    )
+                },
+        ) {
             when {
                 state.loading -> LoadingState("正在读取音频标签…", Modifier.padding(padding))
                 state.loadError != null -> ErrorState(

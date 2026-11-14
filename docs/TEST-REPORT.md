@@ -285,11 +285,24 @@ MIUI UI 专项验证（均为真机/模拟器截图确认）：
   154 个单测通过。
 - 版本 `versionCode 10` / `versionName 1.2.7`。
 
+### 第十六轮 v1.2.8（2026-11-15）
+
+- 编辑页左右滑动切换 Tab：`detectHorizontalDragGestures` 挂在内容层，位移超过 64dp 后切换，
+  与纵向滚动、歌词文本编辑共存。
+- 新增 `MusicBrainzSource`：搜索 `ws/2/recording`，解析录音/艺人/专辑/时长，封面使用
+  Cover Art Archive；无歌词；自定义 User-Agent，1.1s 限流，429/503 自动重试两次。
+- 数据源注册、设置下拉与在线匹配分段栏均增加 MusicBrainz；`MusicSourcesTest` 更新，
+  新增 `MusicBrainzSourceTest` 5 个用例。
+- 设置页通过 `LocalDensity(fontScale * 1.05)` 放大文字，卡片布局同步适配。
+- release APK 1,589,237 字节；API 36 模拟器验证滑动切换、MusicBrainz 搜索与设置布局。
+- `:core` 测试共 159 个，全部通过。
+- 版本 `versionCode 11` / `versionName 1.2.8`。
+
 ## 3. 构建产物
 
 - `app/build/outputs/apk/release/app-release.apk`（约 **1.5 MB**，R8 压缩、资源裁剪，debug 签名）
 - `app/build/outputs/apk/debug/app-debug.apk`（约 11 MB，供开发调试）
-- `dist/MusicTagger-v1.2.7.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
+- `dist/MusicTagger-v1.2.8.apk`（交付副本，SHA-256 见 `dist/SHA256.txt`）
 
 ## 4. 复现步骤
 

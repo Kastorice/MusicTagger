@@ -1,4 +1,4 @@
-package com.musictag.app.ui.settings
+﻿package com.musictag.app.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import com.musictag.app.BuildConfig
@@ -54,13 +57,17 @@ fun SettingsScreen(
     val sources = MusicSourceId.entries
     val dynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     var sourceMenuExpanded by remember { mutableStateOf(false) }
+    val density = LocalDensity.current
 
     Column(modifier = modifier.fillMaxSize().padding(contentPadding)) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+        CompositionLocalProvider(
+            LocalDensity provides Density(density.density, density.fontScale * 1.05f),
         ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
             item {
                 SettingsGroup(title = "外观") {
                     SwitchPreference(
@@ -83,7 +90,7 @@ fun SettingsScreen(
                         Box {
                             BasicComponent(
                                 title = "默认搜索平台",
-                                summary = "用于歌词与封面的在线匹配（非官方接口）",
+                                summary = "歌词与封面的在线匹配（非官方接口）",
                                 onClick = { sourceMenuExpanded = true },
                                 insideMargin = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                 endActions = {
@@ -173,6 +180,7 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
         }
     }
 }

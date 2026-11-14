@@ -1,5 +1,6 @@
-package com.musictag.core.net
+﻿package com.musictag.core.net
 
+import com.musictag.core.net.musicbrainz.MusicBrainzSource
 import com.musictag.core.net.netease.NeteaseSource
 import com.musictag.core.net.qq.QqMusicSource
 
@@ -17,6 +18,7 @@ object MusicSources {
     fun create(neteaseApiBase: String? = null): List<MusicSource> = listOf(
         NeteaseSource(Http, neteaseApiBase),
         QqMusicSource(Http),
+        MusicBrainzSource(Http),
     )
 
     fun byId(id: MusicSourceId, neteaseApiBase: String? = null): MusicSource? =

@@ -1,4 +1,4 @@
-package com.musictag.core.net
+﻿package com.musictag.core.net
 
 import com.musictag.core.tag.Artwork
 
@@ -6,6 +6,7 @@ import com.musictag.core.tag.Artwork
 enum class MusicSourceId(val displayName: String) {
     NETEASE("网易云音乐"),
     QQ("QQ 音乐"),
+    MUSICBRAINZ("MusicBrainz"),
 }
 
 /** A search result (or a resolved song with album information). */

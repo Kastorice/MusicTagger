@@ -2,7 +2,7 @@
 
 一个 **MIUI / HyperOS 风格**（基于 [MiuiX](https://github.com/compose-miuix-ui/miuix)）的 Android
 本地音乐标签编辑器：选择本地音频文件，编辑歌曲名、歌手、专辑、年份、音轨、流派、歌词与专辑封面，
-并把修改直接写回文件；歌词和封面可以从 **网易云音乐 / QQ 音乐** 在线搜索匹配后嵌入。
+并把修改直接写回文件；歌词和封面可以从 **网易云音乐 / QQ 音乐 / MusicBrainz** 在线搜索匹配后嵌入。
 
 > 所有音频与图片只在本机处理，不上传任何文件。在线功能仅查询公开的歌词 / 封面信息。
 
@@ -33,7 +33,7 @@ Material You 动态取色（可选，从壁纸颜色生成 MIUI 风格主题）�
 
 关于音签与 GitHub 链接：`docs/screenshots/13-about.png`
 
-设置页在线数据源选择器：`docs/screenshots/18-settings-source.png`
+设置页在线数据源选择器：`docs/screenshots/18-settings-source.png`\n\nMusicBrainz 搜索结果：`docs/screenshots/19-musicbrainz.png`
 
 曲库搜索（实时过滤，输入框内清除 + 右侧取消；无结果时不显示任何占位文案）：
 `docs/screenshots/14-search.png` / `docs/screenshots/15-search-empty.png`
@@ -96,7 +96,7 @@ MusicTagger/
 │       └── MainActivity.kt       # 单 Activity + 打开方式/分享入口
 ├── core/                         # 纯 JVM 标签与网络核心
 │   ├── src/main/kotlin/com/musictag/core/tag/       # TagEditor + 四种格式实现
-│   ├── src/main/kotlin/com/musictag/core/net/       # 网易云 / QQ 音乐 / HTTP / JSON / LRC
+│   ├── src/main/kotlin/com/musictag/core/net/       # 网易云 / QQ / MusicBrainz / HTTP / JSON / LRC
 │   ├── src/test/kotlin/...                          # 单元测试（ffmpeg/ffprobe 交叉验证）
 │   └── src/test/resources/fixtures/                 # 合成音频测试素材
 ├── tools/                        # 构建、模拟器、E2E 自动化脚本
@@ -124,7 +124,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build.ps1 -Tasks ":cor
 APK 输出：调试版 `app/build/outputs/apk/debug/app-debug.apk`，发布版
 `app/build/outputs/apk/release/app-release.apk`（约 1.5 MB，R8 压缩、资源裁剪、仅保留
 中英资源；当前 release 使用 debug 签名以便直接安装，正式上架前应替换为发布签名）。
-交付副本：`dist/MusicTagger-v1.2.7.apk`，SHA-256 见 `dist/SHA256.txt`。
+交付副本：`dist/MusicTagger-v1.2.8.apk`，SHA-256 见 `dist/SHA256.txt`。
 
 ## 测试
 
@@ -146,7 +146,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\e2e\prepare-media.ps1
 - 网易云/QQ 音乐接口均为非官方公开接口，可能随服务端调整失效；不提供登录、下载音频、
   评论等能力，只读取搜索结果、歌词和专辑封面。可配置自建 NeteaseCloudMusicApi 作为回退。
 - Spotify 源暂未接入：其官方 Web API 必须 OAuth（需开发者 Client ID/Secret）且不提供歌词接口；
-  匿名 web-player token 接口经测试被 403 拒绝，因此保留网易云 / QQ 两个数据源。
+  匿名 web-player token 接口经测试被 403 拒绝，因此保留网易云 / QQ / MusicBrainz 三个数据源。\n- MusicBrainz 无歌词且有限流（约 1 次/秒），请求过快时会自动重试或提示稍后再试。
 - 封面写入为「单一前置封面」策略；`OGG` 中其它图片类型会被替换。
 - 极少数特殊容器（分片 MP4 `moof`、链式/复用 OGG 流）不支持写入，会给出中文错误提示，
   不会破坏原文件。
